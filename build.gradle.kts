@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
-    id("org.springframework.boot") version "4.1.0"
+    id("org.springframework.boot") version "4.1.1"
     kotlin("jvm") version "2.4.10"
     kotlin("plugin.spring") version "2.4.10"
 }
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.0"))
+    implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
     implementation(platform("dev.langchain4j:langchain4j-bom:1.19.0"))
 
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
