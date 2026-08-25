@@ -1,5 +1,6 @@
 # Talent Intelligence Platform
 
+[![CI](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-0.1.0-174a42)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-d75d3b)](LICENSE)
 

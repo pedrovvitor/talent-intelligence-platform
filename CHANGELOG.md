@@ -15,7 +15,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - React and TypeScript recruiter workspace.
 - Docker Compose development environment with health-gated dependencies.
 - Engineering, architecture, security, operations, ADR, and contribution documentation.
-- Backend and frontend automated quality gates.
+- Backend and frontend continuous integration quality gates.
 
 [Unreleased]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.1.0...HEAD
 [0.1.0]: https://github.com/pedrovvitor/talent-intelligence-platform/releases/tag/v0.1.0
