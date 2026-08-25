@@ -1,0 +1,11 @@
+.git
+.github
+.gradle
+.idea
+.npm-cache
+build
+frontend/dist
+frontend/node_modules
+docs
+*.iml
+*.log

@@ -1,0 +1,17 @@
+.gradle/
+.gradle-user-home/
+.idea/
+.npm-cache/
+.env
+.env.*
+!.env.example
+build/
+frontend/dist/
+frontend/node_modules/
+*.iml
+*.log
+*.pid
+*.tmp
+*.swp
+.DS_Store
+Thumbs.db

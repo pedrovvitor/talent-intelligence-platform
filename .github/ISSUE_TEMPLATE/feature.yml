@@ -1,0 +1,47 @@
+name: Feature
+description: Propose an outcome-backed product or engineering change
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What measurable user or engineering outcome should change?
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context and evidence
+      description: Include research, constraints, and affected users.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable pass/fail criteria.
+    validations:
+      required: true
+  - type: textarea
+    id: architecture
+    attributes:
+      label: Architecture and AI boundaries
+      description: Describe ports, data ownership, model/tool permissions, and side effects.
+    validations:
+      required: true
+  - type: textarea
+    id: operations
+    attributes:
+      label: Security, operations, and rollback
+      description: Cover telemetry, failure behavior, compatibility, and rollback.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: New dependencies
+      description: State none, or provide rationale, license, operational cost, and exit strategy.
+    validations:
+      required: true
