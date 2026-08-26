@@ -21,6 +21,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 ### Changed
 
 - Reduced the frontend Docker build context by excluding local dependencies and generated artifacts.
+- Updated GitHub Actions to maintained Node.js 24-based major versions.
 
 ## [0.1.1] - 2026-08-25
 
