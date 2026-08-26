@@ -51,6 +51,20 @@
             "access.token.claim": "true",
             "introspection.token.claim": "true"
           }
+        },
+        {
+          "name": "tenant-identity",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
         }
       ]
     },
@@ -75,6 +89,20 @@
             "access.token.claim": "true",
             "introspection.token.claim": "true"
           }
+        },
+        {
+          "name": "tenant-identity",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-attribute-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "tenant_id",
+            "claim.name": "tenant_id",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "userinfo.token.claim": "true"
+          }
         }
       ]
     }
@@ -87,6 +115,7 @@
       "lastName": "Recruiter",
       "enabled": true,
       "emailVerified": true,
+      "attributes": { "tenant_id": ["00000000-0000-0000-0000-000000000001"] },
       "credentials": [
         { "type": "password", "value": "recruiter-local-only", "temporary": false }
       ],
@@ -99,6 +128,7 @@
       "lastName": "Administrator",
       "enabled": true,
       "emailVerified": true,
+      "attributes": { "tenant_id": ["00000000-0000-0000-0000-000000000001"] },
       "credentials": [
         { "type": "password", "value": "admin-local-only", "temporary": false }
       ],

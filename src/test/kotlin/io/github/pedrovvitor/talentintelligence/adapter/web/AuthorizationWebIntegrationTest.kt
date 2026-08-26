@@ -16,7 +16,7 @@ import org.springframework.test.web.servlet.get
 import org.springframework.test.web.servlet.post
 
 @WebMvcTest(controllers = [JobController::class, MatchController::class])
-@Import(SecurityConfiguration::class)
+@Import(SecurityConfiguration::class, RequestIdentityResolver::class)
 class AuthorizationWebIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
@@ -48,7 +48,11 @@ class AuthorizationWebIntegrationTest(
     @Test
     fun `recruiter can request matches`() {
         mockMvc.post("/api/matches") {
-            with(jwt().authorities(SimpleGrantedAuthority("ROLE_RECRUITER")))
+            with(
+                jwt()
+                    .jwt { token -> token.claim("tenant_id", TENANT_ID) }
+                    .authorities(SimpleGrantedAuthority("ROLE_RECRUITER")),
+            )
             contentType = MediaType.APPLICATION_JSON
             content = MATCH_REQUEST
         }.andExpect {
@@ -60,7 +64,11 @@ class AuthorizationWebIntegrationTest(
     @Test
     fun `recruiter cannot create jobs`() {
         mockMvc.post("/api/jobs") {
-            with(jwt().authorities(SimpleGrantedAuthority("ROLE_RECRUITER")))
+            with(
+                jwt()
+                    .jwt { token -> token.claim("tenant_id", TENANT_ID) }
+                    .authorities(SimpleGrantedAuthority("ROLE_RECRUITER")),
+            )
             contentType = MediaType.APPLICATION_JSON
             content = "{}"
         }.andExpect {
@@ -72,7 +80,11 @@ class AuthorizationWebIntegrationTest(
     @Test
     fun `admin reaches catalog mutation validation`() {
         mockMvc.post("/api/jobs") {
-            with(jwt().authorities(SimpleGrantedAuthority("ROLE_ADMIN")))
+            with(
+                jwt()
+                    .jwt { token -> token.claim("tenant_id", TENANT_ID) }
+                    .authorities(SimpleGrantedAuthority("ROLE_ADMIN")),
+            )
             contentType = MediaType.APPLICATION_JSON
             content = INVALID_JOB_REQUEST
         }.andExpect {
@@ -82,6 +94,8 @@ class AuthorizationWebIntegrationTest(
     }
 
     companion object {
+        private const val TENANT_ID = "00000000-0000-0000-0000-000000000001"
+
         private val MATCH_REQUEST = """
             {
               "headline": "Synthetic JVM Engineer",

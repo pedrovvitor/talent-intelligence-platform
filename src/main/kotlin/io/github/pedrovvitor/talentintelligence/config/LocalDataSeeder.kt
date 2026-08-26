@@ -3,12 +3,14 @@ package io.github.pedrovvitor.talentintelligence.config
 import io.github.pedrovvitor.talentintelligence.application.CreateJobCommand
 import io.github.pedrovvitor.talentintelligence.application.JobCatalogService
 import io.github.pedrovvitor.talentintelligence.domain.Seniority
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
 import org.springframework.boot.ApplicationArguments
 import org.springframework.boot.ApplicationRunner
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import java.math.BigDecimal
+import java.util.UUID
 
 @Component
 @Profile("local")
@@ -16,10 +18,10 @@ class LocalDataSeeder(
     private val jobCatalogService: JobCatalogService,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        if (jobCatalogService.count() > 0) {
+        if (jobCatalogService.count(LOCAL_TENANT_ID) > 0) {
             return
         }
-        sampleJobs.forEach(jobCatalogService::create)
+        sampleJobs.forEach { job -> jobCatalogService.create(LOCAL_TENANT_ID, job) }
     }
 
     private val sampleJobs = listOf(
@@ -57,4 +59,8 @@ class LocalDataSeeder(
             salaryMax = BigDecimal("125000"),
         ),
     )
+
+    companion object {
+        val LOCAL_TENANT_ID = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+    }
 }

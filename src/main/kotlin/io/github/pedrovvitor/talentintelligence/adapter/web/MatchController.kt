@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -61,9 +62,13 @@ data class JobMatchResponse(
 @RequestMapping("/api/matches")
 class MatchController(
     private val matchingService: MatchingService,
+    private val identityResolver: RequestIdentityResolver,
 ) {
     @PostMapping
-    fun match(@Valid @RequestBody request: MatchRequest): MatchResponse {
+    fun match(
+        @Valid @RequestBody request: MatchRequest,
+        authentication: JwtAuthenticationToken,
+    ): MatchResponse {
         val candidate = CandidateProfile(
             headline = request.headline.trim(),
             summary = request.summary.trim(),
@@ -73,6 +78,7 @@ class MatchController(
             preferredLocations = request.preferredLocations.map(String::trim).filter(String::isNotEmpty).toSet(),
             minimumSalary = request.minimumSalary,
         )
-        return MatchResponse(matchingService.match(candidate, request.limit).map(JobMatchResponse::from))
+        val tenantId = identityResolver.resolve(authentication).tenantId
+        return MatchResponse(matchingService.match(tenantId, candidate, request.limit).map(JobMatchResponse::from))
     }
 }

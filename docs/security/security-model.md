@@ -35,13 +35,13 @@ OIDC is implemented locally for v0.2 development. The gateway, WAF, production i
 - OIDC Authorization Code with PKCE for the browser and signed JWT validation at the API.
 - Exact issuer and audience validation with short-lived tokens and a required actor subject.
 - Allow-listed recruiter/admin capabilities with fail-closed route authorization.
+- Signed tenant identity propagated explicitly through use cases, SQL predicates, and composite database constraints.
 - Local model output limited to embeddings; it cannot invoke tools or produce executable UI.
 
 Candidate processing, retention, access-event fields, and deletion requirements are defined in the [data governance policy](data-governance.md).
 
 ## Required controls before production
 
-- Tenant identity enforced in services, queries, constraints, cache keys, and telemetry.
 - Managed secrets with rotation; no production secrets in environment files or manifests.
 - TLS at every external boundary and encryption at rest with managed keys.
 - Immutable decision audit with actor, purpose, source, policy, model, prompt, and embedding versions.

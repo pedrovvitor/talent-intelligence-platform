@@ -80,22 +80,22 @@ sequenceDiagram
     UI->>UI: Refresh token when expiry is near
     UI->>Security: POST /api/matches with Bearer token
     Security->>IdP: Resolve signing key from JWK set when needed
-    Security->>Security: Validate signature, iss, aud, exp, nbf, sub
+    Security->>Security: Validate signature, iss, aud, exp, nbf, sub, tenant_id
     Security->>Security: Require RECRUITER or ADMIN capability
     Security->>API: Authenticated request
     API->>API: Bean Validation at trust boundary
-    API->>Service: match(candidate, limit)
+    API->>Service: match(tenantId, candidate, limit)
     Service->>Embed: embed(profile query)
     Embed->>Model: Generate 384-dimensional vector
     Model-->>Embed: Query embedding
     Embed-->>Service: Float vector
-    Service->>Index: search(vector, retrievalWindow=100)
-    Index->>DB: Cosine similarity query on HNSW index
+    Service->>Index: search(tenantId, vector, retrievalWindow=100)
+    Index->>DB: Tenant-filtered cosine query on HNSW index
     DB-->>Index: Ranked job IDs and semantic scores
     Index-->>Service: Semantic candidates
     loop Each semantic candidate
-        Service->>Catalog: findById(jobId)
-        Catalog->>DB: Read canonical job
+        Service->>Catalog: findById(tenantId, jobId)
+        Catalog->>DB: Read tenant-owned canonical job
         DB-->>Catalog: Transactional job record
         Catalog-->>Service: JobPosting
         Service->>Policy: evaluate(candidate, job)
@@ -178,6 +178,7 @@ curl --request POST http://localhost:8080/api/matches \
 | Explainability | Typed semantic, skill, and eligibility evidence in every result |
 | Architecture | Domain, application, and adapters with dependency inversion |
 | Data integrity | Flyway-managed PostgreSQL schema; canonical records separated from vectors |
+| Tenant isolation | Signed claim, typed context, scoped catalog/vector queries, and composite database constraints |
 | Retrieval | Version-ready 384-dimensional vectors and HNSW cosine index |
 | Resilience | Bounded DB pool, explicit connection timeouts, probes, graceful shutdown |
 | Supply chain | Locked npm graph, pinned major toolchain versions, automated dependency updates |
@@ -222,6 +223,7 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 - [Coding standards](docs/engineering/coding-standards.md)
 - [Security model](docs/security/security-model.md)
 - [Authentication and authorization](docs/security/authentication-and-authorization.md)
+- [Tenant isolation](docs/security/tenant-isolation.md)
 - [Data governance](docs/security/data-governance.md)
 - [Production readiness](docs/operations/production-readiness.md)
 - [Architecture decision records](docs/adr/)

@@ -23,7 +23,13 @@ class SchemaMigrationIntegrationTest {
                 statement.executeQuery("SELECT extversion FROM pg_extension WHERE extname = 'vector'").use { result ->
                     assertTrue(result.next())
                 }
-                statement.executeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_name IN ('jobs', 'job_embeddings')").use { result ->
+                statement.executeQuery("SELECT COUNT(*) FROM information_schema.tables WHERE table_name IN ('tenants', 'jobs', 'job_embeddings')").use { result ->
+                    assertTrue(result.next())
+                    assertEquals(3, result.getInt(1))
+                }
+                statement.executeQuery(
+                    "SELECT COUNT(*) FROM information_schema.columns WHERE table_name IN ('jobs', 'job_embeddings') AND column_name = 'tenant_id'",
+                ).use { result ->
                     assertTrue(result.next())
                     assertEquals(2, result.getInt(1))
                 }
