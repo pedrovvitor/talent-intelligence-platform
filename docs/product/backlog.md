@@ -17,7 +17,7 @@ Tickets are ordered by dependency and intended GitHub milestone.
 - `TIP-102` Introduce tenant-scoped queries and database constraints. Done.
 - `TIP-103` Persist immutable match decisions with model, embedding, policy, and source versions. Done.
 - `TIP-104` Define retention, deletion, and data-subject workflows for candidate data. Done.
-- `TIP-105` Add integration tests for tenant isolation and authorization failures.
+- `TIP-105` Add integration tests for tenant isolation and authorization failures. Done.
 
 ## v0.3.0 — Agentic workflow and Generative UI
 

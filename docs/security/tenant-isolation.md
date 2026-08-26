@@ -58,3 +58,4 @@ Automated tests use synthetic tenants to prove:
 - a mismatched embedding tenant and canonical job is rejected by PostgreSQL;
 - a missing or malformed `tenant_id` fails closed during JWT conversion;
 - allowed HTTP requests receive tenant identity from the authenticated JWT.
+- a signed tenant B token cannot retrieve tenant A's audited decision identifier.

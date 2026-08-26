@@ -77,13 +77,17 @@ The browser client has exact localhost origins, PKCE S256, no client authenticat
 Automated MVC tests prove that:
 
 - a missing bearer token returns 401;
+- an RS256 token signed by an untrusted key returns 401;
+- a correctly signed token expired beyond permitted clock skew returns 401;
+- a correctly signed token with only an unsupported role returns 403;
 - an authenticated token without an allow-listed platform role returns 403;
 - a recruiter can invoke matching but cannot mutate the job catalog;
 - an admin reaches catalog request and business validation;
 - unknown realm roles never become Spring authorities.
 - missing or malformed tenant claims fail closed before a use case runs.
+- tenant B receives a non-disclosing 404 when requesting tenant A's audited decision identifier.
 
-The Docker smoke test additionally uses real Keycloak tokens to prove issuer, audience, tenant identity, role mapping, invalid-token rejection, recruiter reads and matching, recruiter mutation denial, and admin access to deterministic business policy. Cross-tenant isolation is proven against PostgreSQL and PGVector by the dedicated integration test. Explicit expired-token HTTP coverage is completed by `TIP-105`.
+The HTTP matrix uses real in-memory RSA signing and verification rather than bypassing the decoder for invalid-signature and expiry scenarios. The Docker smoke test additionally uses real Keycloak tokens to prove issuer, audience, tenant identity, role mapping, invalid-token rejection, recruiter reads and matching, recruiter mutation denial, and admin access to deterministic business policy. Cross-tenant isolation is independently proven against PostgreSQL, PGVector, and the immutable audit adapter. See the complete [security verification matrix](security-verification.md).
 
 ## Production requirements
 

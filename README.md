@@ -191,6 +191,7 @@ curl --request POST http://localhost:8080/api/matches \
 | Supply chain | Locked npm graph, pinned major toolchain versions, automated dependency updates |
 | Runtime security | Input validation, security headers, non-root containers, read-only filesystems |
 | Quality | Strict Kotlin warnings, strict TypeScript, ESLint, unit and integration tests |
+| Security verification | Real-RSA negative HTTP matrix plus Docker-backed tenant, vector, and audit invariants |
 
 ## Development
 
@@ -232,6 +233,7 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 - [Security model](docs/security/security-model.md)
 - [Authentication and authorization](docs/security/authentication-and-authorization.md)
 - [Tenant isolation](docs/security/tenant-isolation.md)
+- [Security verification matrix](docs/security/security-verification.md)
 - [Data governance](docs/security/data-governance.md)
 - [Production readiness](docs/operations/production-readiness.md)
 - [Architecture decision records](docs/adr/)
