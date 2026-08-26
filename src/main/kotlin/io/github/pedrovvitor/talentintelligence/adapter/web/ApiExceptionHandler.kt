@@ -26,7 +26,7 @@ class ApiExceptionHandler {
         request: HttpServletRequest,
     ): ResponseEntity<ApiError> {
         val violations = exception.bindingResult.fieldErrors.associate { error ->
-            error.field to (error.defaultMessage ?: "Invalid value")
+            error.field to ValidationMessageRedactor.redact(error.codes.orEmpty())
         }
         return errorResponse(HttpStatus.BAD_REQUEST, "VALIDATION_FAILED", "Request validation failed", request, violations)
     }
@@ -51,4 +51,23 @@ class ApiExceptionHandler {
             violations = violations,
         ),
     )
+}
+
+private object ValidationMessageRedactor {
+    private val messagesByConstraint = mapOf(
+        "NotBlank" to "Required value is missing",
+        "NotEmpty" to "Required value is missing",
+        "Size" to "Value has an invalid size",
+        "Pattern" to "Value has an invalid format",
+        "DecimalMin" to "Value is outside the allowed range",
+        "Min" to "Value is outside the allowed range",
+        "Max" to "Value is outside the allowed range",
+    )
+
+    fun redact(codes: Array<out String>): String = codes
+        .asSequence()
+        .map { code -> code.substringBefore('.') }
+        .mapNotNull(messagesByConstraint::get)
+        .firstOrNull()
+        ?: "Invalid value"
 }

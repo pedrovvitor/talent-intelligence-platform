@@ -4,6 +4,11 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- Candidate data classification, retention, deletion, access-logging, and redaction policy.
+- Privacy regression tests that prevent rejected candidate values from leaking through validation responses.
+
 ## [0.1.1] - 2026-08-25
 
 ### Fixed

@@ -197,6 +197,7 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 - [Dependency policy](docs/architecture/dependency-policy.md)
 - [Coding standards](docs/engineering/coding-standards.md)
 - [Security model](docs/security/security-model.md)
+- [Data governance](docs/security/data-governance.md)
 - [Production readiness](docs/operations/production-readiness.md)
 - [Architecture decision records](docs/adr/)
 

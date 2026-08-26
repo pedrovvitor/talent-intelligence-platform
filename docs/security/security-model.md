@@ -19,7 +19,7 @@ flowchart LR
     API -->|Typed events| Browser
 ```
 
-The gateway, OIDC, WAF, and remote model boundary are production targets and are not included in the local `v0.1.0` stack.
+The gateway, OIDC, WAF, and remote model boundary are production targets and are not included in the local `v0.1.1` stack.
 
 ## Current controls
 
@@ -31,7 +31,10 @@ The gateway, OIDC, WAF, and remote model boundary are production targets and are
 - A bounded executable tmpfs is dedicated to ONNX native libraries while the general temporary filesystem remains non-executable.
 - Database credentials supplied through environment variables and excluded from Git.
 - Stable API errors that avoid stack-trace disclosure.
+- Validation errors discard rejected values and untrusted validator messages.
 - Local model output limited to embeddings; it cannot invoke tools or produce executable UI.
+
+Candidate processing, retention, access-event fields, and deletion requirements are defined in the [data governance policy](data-governance.md).
 
 ## Required controls before production
 
@@ -40,7 +43,7 @@ The gateway, OIDC, WAF, and remote model boundary are production targets and are
 - Managed secrets with rotation; no production secrets in environment files or manifests.
 - TLS at every external boundary and encryption at rest with managed keys.
 - Immutable decision audit with actor, purpose, source, policy, model, prompt, and embedding versions.
-- PII classification, minimization, retention, deletion, access logging, and redaction tests.
+- Automated tenant-bound deletion and retention execution for persisted candidate data if profile storage is introduced.
 - Rate limits, body-size limits, WAF rules, abuse detection, and safe CORS policy.
 - SAST, SCA, secret scanning, DAST, SBOM, signed images, and deployment admission policy.
 
