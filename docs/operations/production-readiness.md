@@ -18,7 +18,8 @@ Status values: `Implemented`, `Partial`, `Planned`, and `Not applicable`.
 | Cache | TTL, tenant-safe keys, stampede protection, invalidation | Not applicable | Redis starts in v0.4, `TIP-303` |
 | Messaging | Outbox, delivery semantics, schema versioning, DLQ | Not applicable | Add only when asynchronous ingestion is justified |
 | Security | Input validation, parameterized SQL, non-root/read-only containers | Implemented | API, persistence adapters, Dockerfiles, Compose |
-| Security | JWT/OIDC, RBAC, tenant isolation | Planned | `TIP-101` and `TIP-102`, v0.2 |
+| Security | JWT/OIDC and recruiter/admin RBAC | Implemented | Resource Server, PKCE browser client, Keycloak realm, and authorization tests in `TIP-101` |
+| Security | Tenant isolation | Planned | `TIP-102`, v0.2 |
 | Security | Secrets manager, TLS/mTLS, encryption at rest | Planned | Production environment, v1.0 |
 | Security | SAST, DAST, SCA, secret scanning, SBOM, signing | Partial | Dependency updates and CI exist; full controls in `TIP-403` |
 | Deploy | Reproducible local Compose stack | Implemented | `docker-compose.yml` |

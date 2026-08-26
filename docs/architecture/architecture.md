@@ -8,6 +8,7 @@ The initial system is a modular monolith using ports and adapters. This keeps bu
 flowchart TB
     subgraph Delivery
         React[React web application]
+        Security[JWT validation and capability RBAC]
         Controllers[HTTP controllers]
     end
     subgraph Application
@@ -27,12 +28,14 @@ flowchart TB
         Embedding[LangChain4jEmbeddingGateway]
     end
     subgraph Infrastructure
+        IdP[OIDC identity provider]
         Postgres[(PostgreSQL)]
         PGVector[(PGVector)]
         BGE[Local BGE model]
     end
 
-    React --> Controllers --> CatalogService
+    React --> IdP
+    React --> Security --> Controllers --> CatalogService
     Controllers --> MatchingService
     CatalogService --> Ports
     MatchingService --> Ports
@@ -43,6 +46,7 @@ flowchart TB
     JDBC --> Postgres
     Vector --> PGVector
     Embedding --> BGE
+    Security --> IdP
     CatalogService --> Job
     MatchingService --> Candidate
     MatchingService --> Evidence

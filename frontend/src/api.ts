@@ -9,10 +9,13 @@ export class TalentApiError extends Error {
   }
 }
 
-export async function findMatches(request: MatchRequest): Promise<MatchResponse> {
+export async function findMatches(request: MatchRequest, accessToken: string): Promise<MatchResponse> {
   const response = await fetch("/api/matches", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify(request),
     signal: AbortSignal.timeout(10_000)
   });

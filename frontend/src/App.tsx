@@ -1,5 +1,6 @@
 import { type SubmitEvent, useState } from "react";
 import { findMatches, TalentApiError } from "./api";
+import type { AuthSession } from "./auth";
 import type { JobMatch, MatchRequest, Seniority, WorkMode } from "./types";
 
 const initialRequest: MatchRequest = {
@@ -13,7 +14,7 @@ const initialRequest: MatchRequest = {
   limit: 5
 };
 
-export default function App() {
+export default function App({ auth }: { auth: AuthSession }) {
   const [request, setRequest] = useState<MatchRequest>(initialRequest);
   const [matches, setMatches] = useState<JobMatch[]>([]);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
@@ -24,7 +25,8 @@ export default function App() {
     setStatus("loading");
     setError(null);
     try {
-      const response = await findMatches(request);
+      const accessToken = await auth.getAccessToken();
+      const response = await findMatches(request, accessToken);
       setMatches(response.matches);
       setStatus("success");
     } catch (caughtError: unknown) {
@@ -42,9 +44,18 @@ export default function App() {
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[#9fc5ad]">Talent Intelligence</p>
             <h1 className="mt-1 text-2xl font-semibold tracking-tight">Evidence-based matching workspace</h1>
           </div>
-          <div className="hidden items-center gap-3 text-sm text-[#d7e6dd] md:flex">
-            <span className="h-2 w-2 rounded-full bg-[#70d89d]" />
-            Local semantic model · PGVector
+          <div className="flex items-center gap-4 text-sm text-[#d7e6dd]">
+            <div className="hidden text-right md:block">
+              <p className="font-semibold text-white">{auth.displayName}</p>
+              <p className="text-xs uppercase tracking-wide">{auth.roles.join(" · ") || "no capability"}</p>
+            </div>
+            <button
+              className="border border-white/30 px-3 py-2 text-xs font-semibold uppercase tracking-wide hover:bg-white/10"
+              onClick={() => { void auth.logout(); }}
+              type="button"
+            >
+              Sign out
+            </button>
           </div>
         </div>
       </header>

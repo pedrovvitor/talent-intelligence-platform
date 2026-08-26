@@ -59,6 +59,8 @@ sequenceDiagram
     autonumber
     actor User as Recruiter
     participant UI as React Workspace
+    participant IdP as OIDC Provider
+    participant Security as JWT + RBAC Filter Chain
     participant API as MatchController
     participant Service as MatchingService
     participant Embed as EmbeddingGateway
@@ -68,9 +70,19 @@ sequenceDiagram
     participant Catalog as JdbcJobCatalog
     participant Policy as EligibilityPolicy
 
+    User->>UI: Open recruiter workspace
+    UI->>IdP: Authorization Code request with PKCE S256
+    IdP-->>UI: Authorization code
+    UI->>IdP: Exchange code and verifier
+    IdP-->>UI: Short-lived access token
     User->>UI: Submit typed candidate profile
     UI->>UI: Validate required fields and normalize lists
-    UI->>API: POST /api/matches
+    UI->>UI: Refresh token when expiry is near
+    UI->>Security: POST /api/matches with Bearer token
+    Security->>IdP: Resolve signing key from JWK set when needed
+    Security->>Security: Validate signature, iss, aud, exp, nbf, sub
+    Security->>Security: Require RECRUITER or ADMIN capability
+    Security->>API: Authenticated request
     API->>API: Bean Validation at trust boundary
     API->>Service: match(candidate, limit)
     Service->>Embed: embed(profile query)
@@ -115,6 +127,15 @@ docker compose up --build
 
 Open `http://localhost:3000`. The first build downloads container and Gradle/npm dependencies; subsequent starts are faster. No API key is required.
 
+Sign in with a synthetic local account:
+
+| Capability | Username | Password |
+|---|---|---|
+| Recruiter | `recruiter.synthetic` | `recruiter-local-only` |
+| Admin | `admin.synthetic` | `admin-local-only` |
+
+Keycloak is available at `http://localhost:8180`. Its development mode, local users, and bootstrap credentials are intentionally excluded from the production design.
+
 Health endpoints:
 
 ```text
@@ -132,6 +153,7 @@ docker compose down
 
 ```bash
 curl --request POST http://localhost:8080/api/matches \
+  --header "Authorization: Bearer $ACCESS_TOKEN" \
   --header "Content-Type: application/json" \
   --data '{
     "headline": "Senior JVM Engineer",
@@ -144,6 +166,8 @@ curl --request POST http://localhost:8080/api/matches \
     "limit": 5
   }'
 ```
+
+`ACCESS_TOKEN` is a short-lived token issued for the API audience. The browser obtains it through Authorization Code with PKCE; the local-only `talent-intelligence-smoke` client supports deterministic command-line verification. See [authentication and authorization](docs/security/authentication-and-authorization.md).
 
 ## Engineering evidence
 
@@ -197,6 +221,7 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 - [Dependency policy](docs/architecture/dependency-policy.md)
 - [Coding standards](docs/engineering/coding-standards.md)
 - [Security model](docs/security/security-model.md)
+- [Authentication and authorization](docs/security/authentication-and-authorization.md)
 - [Data governance](docs/security/data-governance.md)
 - [Production readiness](docs/operations/production-readiness.md)
 - [Architecture decision records](docs/adr/)
