@@ -14,6 +14,7 @@ class JobCatalogServiceTest {
 
         assertFailsWith<InvalidJobException> {
             service.create(
+                TEST_TENANT_ID,
                 CreateJobCommand(
                     title = "Backend Engineer",
                     company = "Northstar",

@@ -62,12 +62,13 @@ flowchart TB
 
 ## Data model
 
-- `jobs` stores canonical structured job postings.
-- `job_embeddings` stores a 384-dimensional vector keyed one-to-one to a job.
-- Foreign-key cascade prevents orphaned embeddings.
+- `tenants` is the ownership root established by the signed identity contract.
+- `jobs` stores canonical structured job postings scoped by non-null tenant identity.
+- `job_embeddings` stores a 384-dimensional vector keyed one-to-one to a job within its tenant.
+- A composite tenant/job foreign key prevents cross-tenant or orphaned embeddings.
 - HNSW with cosine operators accelerates nearest-neighbor retrieval.
 
-The next schema version must add embedding model/version and content hash before multiple embedding strategies are introduced.
+Every repository and semantic-index operation takes an explicit `TenantId`. Future cache keys must contain tenant, model, policy, and normalized-input identity. See [tenant isolation](../security/tenant-isolation.md).
 
 ## AI boundary
 

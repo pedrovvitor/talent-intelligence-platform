@@ -1,13 +1,14 @@
 package io.github.pedrovvitor.talentintelligence.application
 
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import java.util.UUID
 
 interface JobCatalog {
-    fun save(job: JobPosting): JobPosting
-    fun findById(id: UUID): JobPosting?
-    fun findAll(): List<JobPosting>
-    fun count(): Long
+    fun save(tenantId: TenantId, job: JobPosting): JobPosting
+    fun findById(tenantId: TenantId, id: UUID): JobPosting?
+    fun findAll(tenantId: TenantId): List<JobPosting>
+    fun count(tenantId: TenantId): Long
 }
 
 interface EmbeddingGateway {
@@ -20,6 +21,6 @@ data class SemanticJobCandidate(
 )
 
 interface SemanticJobIndex {
-    fun index(jobId: UUID, searchableContent: String, embedding: FloatArray)
-    fun search(queryEmbedding: FloatArray, limit: Int): List<SemanticJobCandidate>
+    fun index(tenantId: TenantId, jobId: UUID, searchableContent: String, embedding: FloatArray)
+    fun search(tenantId: TenantId, queryEmbedding: FloatArray, limit: Int): List<SemanticJobCandidate>
 }

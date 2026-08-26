@@ -5,6 +5,7 @@ import io.github.pedrovvitor.talentintelligence.domain.EligibilityPolicy
 import io.github.pedrovvitor.talentintelligence.domain.JobMatch
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
 import io.github.pedrovvitor.talentintelligence.domain.MatchEvidence
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.normalized
 import org.springframework.stereotype.Service
 import kotlin.math.round
@@ -16,12 +17,12 @@ class MatchingService(
     private val embeddingGateway: EmbeddingGateway,
     private val eligibilityPolicy: EligibilityPolicy,
 ) {
-    fun match(candidate: CandidateProfile, limit: Int): List<JobMatch> {
+    fun match(tenantId: TenantId, candidate: CandidateProfile, limit: Int): List<JobMatch> {
         val safeLimit = limit.coerceIn(1, MAX_RESULTS)
         val queryEmbedding = embeddingGateway.embed(buildCandidateQuery(candidate))
-        return semanticJobIndex.search(queryEmbedding, RETRIEVAL_WINDOW)
+        return semanticJobIndex.search(tenantId, queryEmbedding, RETRIEVAL_WINDOW)
             .mapNotNull { semanticCandidate ->
-                val job = jobCatalog.findById(semanticCandidate.jobId) ?: return@mapNotNull null
+                val job = jobCatalog.findById(tenantId, semanticCandidate.jobId) ?: return@mapNotNull null
                 if (!eligibilityPolicy.evaluate(candidate, job).eligible) {
                     return@mapNotNull null
                 }

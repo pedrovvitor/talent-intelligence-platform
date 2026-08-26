@@ -4,6 +4,7 @@ import io.github.pedrovvitor.talentintelligence.domain.CandidateProfile
 import io.github.pedrovvitor.talentintelligence.domain.EligibilityPolicy
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
 import io.github.pedrovvitor.talentintelligence.domain.Seniority
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
@@ -25,7 +26,7 @@ class MatchingServiceTest {
         )
         val service = MatchingService(catalog, index, ConstantEmbeddingGateway, EligibilityPolicy())
 
-        val matches = service.match(candidate(), 5)
+        val matches = service.match(TEST_TENANT_ID, candidate(), 5)
 
         assertEquals(1, matches.size)
         assertEquals(eligibleJob.id, matches.single().jobId)
@@ -64,19 +65,26 @@ internal object ConstantEmbeddingGateway : EmbeddingGateway {
 internal class FixedSemanticIndex(
     private val candidates: List<SemanticJobCandidate>,
 ) : SemanticJobIndex {
-    override fun index(jobId: UUID, searchableContent: String, embedding: FloatArray) = Unit
+    override fun index(tenantId: TenantId, jobId: UUID, searchableContent: String, embedding: FloatArray) = Unit
 
-    override fun search(queryEmbedding: FloatArray, limit: Int): List<SemanticJobCandidate> = candidates.take(limit)
+    override fun search(tenantId: TenantId, queryEmbedding: FloatArray, limit: Int): List<SemanticJobCandidate> =
+        candidates.take(limit)
 }
 
 internal class InMemoryJobCatalog(jobs: List<JobPosting>) : JobCatalog {
-    private val jobsById = jobs.associateBy(JobPosting::id).toMutableMap()
+    private val jobsByTenantAndId = jobs.associateBy { job -> TEST_TENANT_ID to job.id }.toMutableMap()
 
-    override fun save(job: JobPosting): JobPosting = job.also { jobsById[it.id] = it }
+    override fun save(tenantId: TenantId, job: JobPosting): JobPosting =
+        job.also { jobsByTenantAndId[tenantId to it.id] = it }
 
-    override fun findById(id: UUID): JobPosting? = jobsById[id]
+    override fun findById(tenantId: TenantId, id: UUID): JobPosting? = jobsByTenantAndId[tenantId to id]
 
-    override fun findAll(): List<JobPosting> = jobsById.values.toList()
+    override fun findAll(tenantId: TenantId): List<JobPosting> = jobsByTenantAndId
+        .filterKeys { (jobTenantId, _) -> jobTenantId == tenantId }
+        .values
+        .toList()
 
-    override fun count(): Long = jobsById.size.toLong()
+    override fun count(tenantId: TenantId): Long = findAll(tenantId).size.toLong()
 }
+
+internal val TEST_TENANT_ID = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000099"))

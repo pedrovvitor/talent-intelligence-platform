@@ -12,6 +12,7 @@ import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Pattern
 import jakarta.validation.constraints.Size
 import org.springframework.http.HttpStatus
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -65,14 +66,20 @@ data class JobResponse(
 @RequestMapping("/api/jobs")
 class JobController(
     private val jobCatalogService: JobCatalogService,
+    private val identityResolver: RequestIdentityResolver,
 ) {
     @GetMapping
-    fun list(): List<JobResponse> = jobCatalogService.list().map(JobResponse::from)
+    fun list(authentication: JwtAuthenticationToken): List<JobResponse> =
+        jobCatalogService.list(identityResolver.resolve(authentication).tenantId).map(JobResponse::from)
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    fun create(@Valid @RequestBody request: CreateJobRequest): JobResponse = JobResponse.from(
+    fun create(
+        @Valid @RequestBody request: CreateJobRequest,
+        authentication: JwtAuthenticationToken,
+    ): JobResponse = JobResponse.from(
         jobCatalogService.create(
+            identityResolver.resolve(authentication).tenantId,
             CreateJobCommand(
                 title = request.title,
                 company = request.company,

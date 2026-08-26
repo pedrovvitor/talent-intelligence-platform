@@ -3,6 +3,7 @@ package io.github.pedrovvitor.talentintelligence.adapter.persistence
 import io.github.pedrovvitor.talentintelligence.application.JobCatalog
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
 import io.github.pedrovvitor.talentintelligence.domain.Seniority
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
 import org.springframework.jdbc.core.simple.JdbcClient
 import org.springframework.stereotype.Repository
@@ -13,17 +14,17 @@ import java.util.UUID
 class JdbcJobCatalog(
     private val jdbcClient: JdbcClient,
 ) : JobCatalog {
-    override fun save(job: JobPosting): JobPosting {
+    override fun save(tenantId: TenantId, job: JobPosting): JobPosting {
         jdbcClient.sql(
             """
             insert into jobs (
-                id, title, company, description, required_skills, seniority,
+                tenant_id, id, title, company, description, required_skills, seniority,
                 work_mode, location, salary_min, salary_max
             ) values (
-                :id, :title, :company, :description, :requiredSkills, :seniority,
+                :tenantId, :id, :title, :company, :description, :requiredSkills, :seniority,
                 :workMode, :location, :salaryMin, :salaryMax
             )
-            on conflict (id) do update set
+            on conflict (tenant_id, id) do update set
                 title = excluded.title,
                 company = excluded.company,
                 description = excluded.description,
@@ -36,6 +37,7 @@ class JdbcJobCatalog(
                 updated_at = now()
             """.trimIndent(),
         )
+            .param("tenantId", tenantId.value)
             .param("id", job.id)
             .param("title", job.title)
             .param("company", job.company)
@@ -50,17 +52,23 @@ class JdbcJobCatalog(
         return job
     }
 
-    override fun findById(id: UUID): JobPosting? = jdbcClient.sql("select * from jobs where id = :id")
+    override fun findById(tenantId: TenantId, id: UUID): JobPosting? = jdbcClient
+        .sql("select * from jobs where tenant_id = :tenantId and id = :id")
+        .param("tenantId", tenantId.value)
         .param("id", id)
         .query(::mapJob)
         .optional()
         .orElse(null)
 
-    override fun findAll(): List<JobPosting> = jdbcClient.sql("select * from jobs order by created_at desc")
+    override fun findAll(tenantId: TenantId): List<JobPosting> = jdbcClient
+        .sql("select * from jobs where tenant_id = :tenantId order by created_at desc")
+        .param("tenantId", tenantId.value)
         .query(::mapJob)
         .list()
 
-    override fun count(): Long = jdbcClient.sql("select count(*) from jobs")
+    override fun count(tenantId: TenantId): Long = jdbcClient
+        .sql("select count(*) from jobs where tenant_id = :tenantId")
+        .param("tenantId", tenantId.value)
         .query(Long::class.java)
         .single()
 

@@ -1,6 +1,8 @@
 package io.github.pedrovvitor.talentintelligence.config
 
 import jakarta.servlet.http.HttpServletResponse
+import io.github.pedrovvitor.talentintelligence.adapter.web.RequestIdentityResolver
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -55,6 +57,7 @@ class SecurityConfiguration {
 
     @Bean
     fun keycloakAuthoritiesConverter(): Converter<Jwt, AbstractAuthenticationToken> = Converter { jwt ->
+        requireTenantId(jwt)
         val authorities = realmRoles(jwt)
             .map(PlatformRole::fromClaim)
             .filterNotNull()
@@ -72,6 +75,19 @@ class SecurityConfiguration {
         jwt.getClaimAsString("preferred_username")
             ?: jwt.subject?.takeIf(String::isNotBlank)
             ?: throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Subject claim is required", null))
+
+    private fun requireTenantId(jwt: Jwt) {
+        val tenantClaim = jwt.getClaimAsString(RequestIdentityResolver.TENANT_CLAIM)
+            ?: throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Tenant claim is required", null))
+        try {
+            TenantId.parse(tenantClaim)
+        } catch (exception: IllegalArgumentException) {
+            throw OAuth2AuthenticationException(
+                OAuth2Error("invalid_token", "Tenant claim is invalid", null),
+                exception,
+            )
+        }
+    }
 
     private fun writeSecurityError(
         response: HttpServletResponse,

@@ -11,6 +11,7 @@ The React application is an OIDC public client. It uses Authorization Code with 
 | `aud` | Contains `talent-intelligence-api` | Spring Boot audience validator |
 | `exp` and `nbf` | Token is currently valid | Spring Security timestamp validator |
 | `sub` | Non-empty stable actor identifier | JWT authentication converter |
+| `tenant_id` | UUID for the actor's authorized tenant | JWT converter and explicit request identity |
 | `realm_access.roles` | `recruiter` or `admin` | Explicit allow-list; all other roles are ignored |
 
 The JWK endpoint may use an internal service address while `iss` retains the browser-visible issuer. This avoids coupling API startup to OIDC discovery and preserves exact issuer validation.
@@ -47,7 +48,7 @@ sequenceDiagram
     IdP-->>UI: Short-lived access token
     UI->>UI: Refresh token when less than 30 seconds remain
     UI->>API: Request with Bearer access token
-    API->>API: Validate signature, iss, aud, exp, nbf, sub
+    API->>API: Validate signature, iss, aud, exp, nbf, sub, tenant_id
     API->>API: Map allow-listed realm roles to capabilities
     alt Capability is present
         API->>UseCase: Invoke typed application operation
@@ -80,8 +81,9 @@ Automated MVC tests prove that:
 - a recruiter can invoke matching but cannot mutate the job catalog;
 - an admin reaches catalog request and business validation;
 - unknown realm roles never become Spring authorities.
+- missing or malformed tenant claims fail closed before a use case runs.
 
-The Docker smoke test additionally uses real Keycloak tokens to prove issuer, audience, role mapping, invalid-token rejection, recruiter reads and matching, recruiter mutation denial, and admin access to deterministic business policy. Expired tokens and cross-tenant denial are completed by `TIP-105` after tenant propagation exists.
+The Docker smoke test additionally uses real Keycloak tokens to prove issuer, audience, tenant identity, role mapping, invalid-token rejection, recruiter reads and matching, recruiter mutation denial, and admin access to deterministic business policy. Cross-tenant isolation is proven against PostgreSQL and PGVector by the dedicated integration test. Explicit expired-token HTTP coverage is completed by `TIP-105`.
 
 ## Production requirements
 

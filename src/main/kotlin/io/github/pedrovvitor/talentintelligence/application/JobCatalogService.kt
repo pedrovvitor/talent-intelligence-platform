@@ -2,6 +2,7 @@ package io.github.pedrovvitor.talentintelligence.application
 
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
 import io.github.pedrovvitor.talentintelligence.domain.Seniority
+import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -27,7 +28,7 @@ class JobCatalogService(
     private val embeddingGateway: EmbeddingGateway,
 ) {
     @Transactional
-    fun create(command: CreateJobCommand): JobPosting {
+    fun create(tenantId: TenantId, command: CreateJobCommand): JobPosting {
         val job = JobPosting(
             id = UUID.randomUUID(),
             title = command.title.trim(),
@@ -41,15 +42,15 @@ class JobCatalogService(
             salaryMax = command.salaryMax,
         )
         validateSalary(job)
-        jobCatalog.save(job)
+        jobCatalog.save(tenantId, job)
         val searchableContent = buildSearchableContent(job)
-        semanticJobIndex.index(job.id, searchableContent, embeddingGateway.embed(searchableContent))
+        semanticJobIndex.index(tenantId, job.id, searchableContent, embeddingGateway.embed(searchableContent))
         return job
     }
 
-    fun list(): List<JobPosting> = jobCatalog.findAll()
+    fun list(tenantId: TenantId): List<JobPosting> = jobCatalog.findAll(tenantId)
 
-    fun count(): Long = jobCatalog.count()
+    fun count(tenantId: TenantId): Long = jobCatalog.count(tenantId)
 
     private fun validateSalary(job: JobPosting) {
         if (job.salaryMin != null && job.salaryMax != null && job.salaryMin > job.salaryMax) {
