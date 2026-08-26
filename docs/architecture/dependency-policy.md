@@ -10,7 +10,7 @@ Dependencies are admitted only when an approved ticket names the capability, alt
 | Language | Kotlin 2.4 | Null safety, concise immutable domain modeling, Java interoperability |
 | AI abstraction | LangChain4j 1.19 | Typed embedding boundary and future guarded tool support |
 | Local embedding | BGE small English v1.5 quantized module | Reproducible semantic retrieval without external credentials |
-| Schema migration | Flyway | Ordered, reviewable PostgreSQL migrations |
+| Schema migration | Spring Boot Flyway starter and Flyway PostgreSQL module | Boot-managed, ordered, reviewable PostgreSQL migrations with database-specific support |
 | Transactional and vector data | PostgreSQL driver and PGVector extension | One source of truth with vector search colocated for the initial scale |
 | Web UI | React 19 | Typed component composition and predictable rendering |
 | Build and styling | Vite 8 and Tailwind CSS 4 | Fast build pipeline and constrained design tokens |

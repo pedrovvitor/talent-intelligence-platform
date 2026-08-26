@@ -1,7 +1,7 @@
 # Talent Intelligence Platform
 
 [![CI](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml)
-[![Version](https://img.shields.io/badge/version-0.1.0-174a42)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-0.1.1-174a42)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-d75d3b)](LICENSE)
 
 An explainable candidate-to-job decision pipeline built with Kotlin, Spring Boot, LangChain4j, React, PostgreSQL, and PGVector. It combines semantic retrieval with deterministic business policies so that AI improves discovery without controlling eligibility or inventing evidence.
@@ -20,7 +20,7 @@ Keyword filters miss transferable experience, while opaque AI rankings create le
 
 ## Current release
 
-`v0.1.0` delivers a production-shaped vertical slice:
+`v0.1.1` delivers a production-shaped vertical slice:
 
 - job catalog write and read APIs;
 - local BGE-small-en-v1.5 embeddings through LangChain4j;

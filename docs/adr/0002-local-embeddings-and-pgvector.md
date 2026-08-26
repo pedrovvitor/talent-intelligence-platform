@@ -16,4 +16,5 @@ Generate 384-dimensional BGE-small-en-v1.5 embeddings in process through a LangC
 - Local execution is deterministic and private.
 - PostgreSQL simplifies the initial operational model.
 - Model startup and embedding computation consume application resources.
+- The runtime image must provide the glibc and C++ ABI required by the official ONNX native library.
 - Embedding model/version and content hashes must be persisted before multiple models or background reindexing are supported.

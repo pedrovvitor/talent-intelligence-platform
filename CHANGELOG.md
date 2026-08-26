@@ -4,6 +4,15 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-08-25
+
+### Fixed
+
+- Restored Spring Boot 4 Flyway auto-configuration for PostgreSQL migrations.
+- Removed an obsolete Kotlin compiler flag that failed warning-strict container builds.
+- Provided the native ONNX runtime with a constrained executable temporary filesystem and a compatible C++ runtime.
+- Corrected the Nginx document root and added an HTTP healthcheck for the recruiter workspace.
+
 ## [0.1.0] - 2026-08-24
 
 ### Added
@@ -17,5 +26,6 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Engineering, architecture, security, operations, ADR, and contribution documentation.
 - Backend and frontend continuous integration quality gates.
 
-[Unreleased]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/pedrovvitor/talent-intelligence-platform/releases/tag/v0.1.1
 [0.1.0]: https://github.com/pedrovvitor/talent-intelligence-platform/releases/tag/v0.1.0

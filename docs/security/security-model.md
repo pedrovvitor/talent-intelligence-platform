@@ -28,6 +28,7 @@ The gateway, OIDC, WAF, and remote model boundary are production targets and are
 - No external model credentials or resume ingestion.
 - Security response headers at the web edge.
 - Non-root API and web containers with read-only filesystems.
+- A bounded executable tmpfs is dedicated to ONNX native libraries while the general temporary filesystem remains non-executable.
 - Database credentials supplied through environment variables and excluded from Git.
 - Stable API errors that avoid stack-trace disclosure.
 - Local model output limited to embeddings; it cannot invoke tools or produce executable UI.

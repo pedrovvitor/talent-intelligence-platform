@@ -7,7 +7,7 @@ plugins {
 }
 
 group = "io.github.pedrovvitor"
-version = "0.1.0"
+version = "0.1.1"
 
 java {
     toolchain {
@@ -27,12 +27,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
+    implementation("org.springframework.boot:spring-boot-starter-flyway")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     implementation("dev.langchain4j:langchain4j")
     implementation("dev.langchain4j:langchain4j-embeddings-bge-small-en-v15-q")
 
-    implementation("org.flywaydb:flyway-core")
     runtimeOnly("org.flywaydb:flyway-database-postgresql")
     runtimeOnly("org.postgresql:postgresql")
 
@@ -47,7 +47,7 @@ dependencies {
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_21
-        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+        freeCompilerArgs.add("-Xjsr305=strict")
         allWarningsAsErrors = true
     }
 }
