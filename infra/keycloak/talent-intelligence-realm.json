@@ -1,19 +1,31 @@
 {
   "realm": "talent-intelligence",
+  "displayName": "Talent Intelligence",
   "enabled": true,
   "sslRequired": "none",
-  "registrationAllowed": false,
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": true,
   "resetPasswordAllowed": false,
-  "rememberMe": false,
+  "rememberMe": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
+  "loginTheme": "talent-intelligence",
   "accessTokenLifespan": 300,
+  "defaultGroups": ["/candidates"],
   "roles": {
     "realm": [
+      { "name": "candidate", "description": "Discover public jobs and create personal match decisions" },
       { "name": "recruiter", "description": "Evaluate candidate-to-job matches" },
       { "name": "admin", "description": "Manage the tenant job catalog" }
     ]
   },
+  "groups": [
+    {
+      "name": "candidates",
+      "path": "/candidates",
+      "realmRoles": ["candidate"]
+    }
+  ],
   "clients": [
     {
       "clientId": "talent-intelligence-api",
@@ -108,6 +120,18 @@
     }
   ],
   "users": [
+    {
+      "username": "candidate.synthetic",
+      "email": "candidate@example.test",
+      "firstName": "Synthetic",
+      "lastName": "Candidate",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "candidate-local-only", "temporary": false }
+      ],
+      "realmRoles": ["candidate"]
+    },
     {
       "username": "recruiter.synthetic",
       "email": "recruiter@example.test",

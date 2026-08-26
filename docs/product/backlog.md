@@ -21,6 +21,9 @@ Tickets are ordered by dependency and intended GitHub milestone.
 
 ## v0.3.0 — Agentic workflow and Generative UI
 
+- `TIP-206` Publish the anonymous product surface and evidence-led pricing. Done.
+- `TIP-207` Add candidate self-registration and least-privilege marketplace access. Done.
+- `TIP-208` Unify product and OIDC branding with responsive accessibility checks. Done.
 - `TIP-201` Define a versioned agent-event schema for SSE.
 - `TIP-202` Implement read-only `searchJobs`, `inspectEligibility`, and `compareMatches` tools.
 - `TIP-203` Add explicit approval before any state-changing recruiter action.

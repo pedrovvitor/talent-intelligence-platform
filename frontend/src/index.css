@@ -5,6 +5,7 @@
   color-scheme: light;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 * {
@@ -15,6 +16,16 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
+  background: #081512;
+}
+
+::selection {
+  background: #b8f34a;
+  color: #081512;
+}
+
+a {
+  color: inherit;
 }
 
 button,

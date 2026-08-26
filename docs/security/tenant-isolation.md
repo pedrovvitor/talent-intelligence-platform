@@ -2,9 +2,11 @@
 
 ## Identity contract
 
-The signed access token is the only tenant source of truth. The API requires a UUID-valued `tenant_id` claim plus a stable `sub` actor claim. It does not accept an `X-Tenant-Id` header, query parameter, request-body field, or browser-selected tenant identifier.
+The signed access token is the only organization-tenant source of truth. Recruiter and administrator identities require a UUID-valued `tenant_id` claim plus a stable `sub` actor claim. The API does not accept an `X-Tenant-Id` header, query parameter, request-body field, or browser-selected tenant identifier.
 
-Missing or malformed tenant identity invalidates authentication. A valid actor without the required capability receives a deterministic authorization failure before business logic executes.
+Candidate-only identities use a server-configured public marketplace tenant and may omit `tenant_id`. This is not a browser override: the marketplace identifier comes from application configuration and candidates receive only public job reads and new match decisions. Any identity with recruiter or administrator authority still requires the signed organization claim.
+
+Missing organization tenant identity or any malformed tenant identity invalidates privileged authentication. A valid actor without the required capability receives a deterministic authorization failure before business logic executes.
 
 ## Enforcement path
 
@@ -34,7 +36,7 @@ sequenceDiagram
 
 ## Persistence invariants
 
-- `tenants.id` is the ownership root.
+- `tenants.id` is the ownership root for organization and public marketplace catalogs.
 - `jobs` stores a non-null `tenant_id` and exposes unique `(tenant_id, id)` ownership.
 - `job_embeddings` stores the same non-null tenant and references `(tenant_id, job_id)` as a composite foreign key.
 - Catalog reads, writes, counts, and vector searches always bind tenant identity.
@@ -57,5 +59,6 @@ Automated tests use synthetic tenants to prove:
 - tenant A vector search cannot return tenant B embeddings;
 - a mismatched embedding tenant and canonical job is rejected by PostgreSQL;
 - a missing or malformed `tenant_id` fails closed during JWT conversion;
+- a candidate-only token without `tenant_id` resolves to the configured marketplace while a recruiter token without it fails closed;
 - allowed HTTP requests receive tenant identity from the authenticated JWT.
 - a signed tenant B token cannot retrieve tenant A's audited decision identifier.

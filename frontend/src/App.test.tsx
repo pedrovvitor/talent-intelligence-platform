@@ -10,6 +10,11 @@ const auth: AuthSession = {
   logout: () => Promise.resolve()
 };
 
+const appActions = {
+  onLogin: () => Promise.resolve(),
+  onRegisterCandidate: () => Promise.resolve()
+};
+
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
@@ -18,7 +23,7 @@ afterEach(() => {
 
 describe("App", () => {
   it("renders the matching workspace", () => {
-    render(<App auth={auth} />);
+    render(<App auth={auth} {...appActions} />);
 
     expect(screen.getByRole("heading", { name: "Evidence-based matching workspace" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Find eligible matches" })).toBeInTheDocument();
@@ -40,7 +45,7 @@ describe("App", () => {
       headers: { "Content-Type": "application/json" }
     })));
     vi.stubGlobal("fetch", fetchMock);
-    render(<App auth={{ ...auth, getAccessToken }} />);
+    render(<App auth={{ ...auth, getAccessToken }} {...appActions} />);
 
     fireEvent.click(screen.getByRole("button", { name: "Find eligible matches" }));
 
@@ -54,5 +59,29 @@ describe("App", () => {
         }
       })
     );
+  });
+
+  it("renders the public product and pricing without forcing authentication", () => {
+    render(<App auth={null} {...appActions} />);
+
+    expect(screen.getByRole("heading", { name: /Talent signals/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "Recruiter Team" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Create candidate account" })).toBeInTheDocument();
+  });
+
+  it("starts candidate self-registration from the public site", () => {
+    const onRegisterCandidate = vi.fn(() => Promise.resolve());
+    render(<App auth={null} onLogin={appActions.onLogin} onRegisterCandidate={onRegisterCandidate} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Create candidate account" }));
+
+    expect(onRegisterCandidate).toHaveBeenCalledOnce();
+  });
+
+  it("uses candidate-specific workspace language", () => {
+    render(<App auth={{ ...auth, roles: ["candidate"] }} {...appActions} />);
+
+    expect(screen.getByRole("heading", { name: "Your evidence-led match workspace" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Discover my matches" })).toBeInTheDocument();
   });
 });

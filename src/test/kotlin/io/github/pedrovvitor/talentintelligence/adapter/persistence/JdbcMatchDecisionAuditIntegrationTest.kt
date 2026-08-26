@@ -77,7 +77,7 @@ class JdbcMatchDecisionAuditIntegrationTest {
 
     companion object {
         private val TENANT_A = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        private val TENANT_B = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        private val TENANT_B = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000003"))
         private const val SOURCE_FINGERPRINT = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 
         @Container

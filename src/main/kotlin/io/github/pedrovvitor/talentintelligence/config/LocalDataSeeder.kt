@@ -18,10 +18,11 @@ class LocalDataSeeder(
     private val jobCatalogService: JobCatalogService,
 ) : ApplicationRunner {
     override fun run(args: ApplicationArguments) {
-        if (jobCatalogService.count(LOCAL_TENANT_ID) > 0) {
-            return
+        LOCAL_CATALOG_TENANTS.forEach { tenantId ->
+            if (jobCatalogService.count(tenantId) == 0L) {
+                sampleJobs.forEach { job -> jobCatalogService.create(tenantId, job) }
+            }
         }
-        sampleJobs.forEach { job -> jobCatalogService.create(LOCAL_TENANT_ID, job) }
     }
 
     private val sampleJobs = listOf(
@@ -62,5 +63,7 @@ class LocalDataSeeder(
 
     companion object {
         val LOCAL_TENANT_ID = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
+        val CANDIDATE_MARKETPLACE_TENANT_ID = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        private val LOCAL_CATALOG_TENANTS = setOf(LOCAL_TENANT_ID, CANDIDATE_MARKETPLACE_TENANT_ID)
     }
 }

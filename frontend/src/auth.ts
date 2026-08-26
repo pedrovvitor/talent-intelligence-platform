@@ -7,24 +7,21 @@ export type AuthSession = {
   logout: () => Promise<void>;
 };
 
-export type PlatformRole = "recruiter" | "admin";
+export type PlatformRole = "candidate" | "recruiter" | "admin";
 
-const supportedRoles: readonly PlatformRole[] = ["recruiter", "admin"];
+const supportedRoles: readonly PlatformRole[] = ["candidate", "recruiter", "admin"];
 
 const keycloak = new Keycloak({
   url: "http://localhost:8180",
   realm: "talent-intelligence",
   clientId: "talent-intelligence-web"
 });
+let initialization: Promise<boolean> | null = null;
 
-export async function initializeAuthentication(): Promise<AuthSession> {
-  const authenticated = await keycloak.init({
-    onLoad: "login-required",
-    pkceMethod: "S256",
-    checkLoginIframe: false
-  });
+export async function initializeAuthentication(): Promise<AuthSession | null> {
+  const authenticated = await initializeKeycloak();
   if (!authenticated) {
-    throw new Error("OIDC authentication did not establish a session");
+    return null;
   }
   const parsedToken: unknown = keycloak.tokenParsed;
 
@@ -42,6 +39,32 @@ export async function initializeAuthentication(): Promise<AuthSession> {
       await keycloak.logout({ redirectUri: window.location.origin });
     }
   };
+}
+
+export async function login(): Promise<void> {
+  await initializeKeycloak();
+  await keycloak.login({ redirectUri: window.location.origin });
+}
+
+export async function registerCandidate(): Promise<void> {
+  await initializeKeycloak();
+  await keycloak.register({ redirectUri: window.location.origin });
+}
+
+export function hasAuthenticationCallback(location: Pick<Location, "hash" | "search">): boolean {
+  const parameters = new URLSearchParams(location.hash.startsWith("#") ? location.hash.slice(1) : location.search);
+  return parameters.has("code") || parameters.has("error");
+}
+
+function initializeKeycloak(): Promise<boolean> {
+  initialization ??= keycloak.init({
+    pkceMethod: "S256",
+    checkLoginIframe: false
+  }).catch((error: unknown) => {
+    initialization = null;
+    throw error;
+  });
+  return initialization;
 }
 
 function readPreferredUsername(token: unknown): string | undefined {

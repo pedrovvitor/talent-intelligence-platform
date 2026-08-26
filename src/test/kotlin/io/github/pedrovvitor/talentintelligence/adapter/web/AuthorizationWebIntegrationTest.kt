@@ -27,7 +27,12 @@ import java.time.Instant
 import java.util.UUID
 
 @WebMvcTest(controllers = [JobController::class, MatchController::class])
-@Import(SecurityConfiguration::class, RequestIdentityResolver::class, SyntheticJwtConfiguration::class)
+@Import(
+    SecurityConfiguration::class,
+    RequestIdentityResolver::class,
+    TenantIdentityPolicy::class,
+    SyntheticJwtConfiguration::class,
+)
 class AuthorizationWebIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
@@ -120,6 +125,42 @@ class AuthorizationWebIntegrationTest(
     }
 
     @Test
+    fun `candidate without tenant claim can request public marketplace matches`() {
+        doReturn(EMPTY_DECISION).`when`(matchingService).match(
+            RequestIdentity("candidate-user", TenantId.parse(CANDIDATE_MARKETPLACE_TENANT_ID)),
+            MATCH_CANDIDATE,
+            5,
+        )
+
+        mockMvc.post("/api/matches") {
+            with(
+                jwt()
+                    .jwt { token -> token.subject("candidate-user") }
+                    .authorities(SimpleGrantedAuthority("ROLE_CANDIDATE")),
+            )
+            contentType = MediaType.APPLICATION_JSON
+            content = MATCH_REQUEST
+        }.andExpect {
+            status { isOk() }
+            jsonPath("$.decisionId") { value(EMPTY_DECISION.id.toString()) }
+        }
+    }
+
+    @Test
+    fun `candidate cannot retrieve a decision by identifier`() {
+        mockMvc.get("/api/matches/${EMPTY_DECISION.id}") {
+            with(
+                jwt()
+                    .jwt { token -> token.subject("candidate-user") }
+                    .authorities(SimpleGrantedAuthority("ROLE_CANDIDATE")),
+            )
+        }.andExpect {
+            status { isForbidden() }
+            jsonPath("$.code") { value("ACCESS_DENIED") }
+        }
+    }
+
+    @Test
     fun `recruiter can reproduce a tenant scoped audited decision`() {
         doReturn(EMPTY_DECISION).`when`(matchingService).findDecision(
             TenantId.parse(TENANT_ID),
@@ -187,7 +228,8 @@ class AuthorizationWebIntegrationTest(
 
     companion object {
         private const val TENANT_ID = "00000000-0000-0000-0000-000000000001"
-        private const val SECOND_TENANT_ID = "00000000-0000-0000-0000-000000000002"
+        private const val SECOND_TENANT_ID = "00000000-0000-0000-0000-000000000003"
+        private const val CANDIDATE_MARKETPLACE_TENANT_ID = "00000000-0000-0000-0000-000000000002"
         private val EMPTY_DECISION = MatchDecision(
             id = UUID.fromString("00000000-0000-0000-0000-000000000100"),
             createdAt = Instant.parse("2026-08-25T12:00:00Z"),

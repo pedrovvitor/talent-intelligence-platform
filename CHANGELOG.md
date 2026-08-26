@@ -4,6 +4,21 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+### Added
+
+- Anonymous product surface with responsive evidence-led branding and transparent launch pricing.
+- Candidate self-registration through a branded Keycloak theme and a synthetic local candidate identity.
+- Least-privilege candidate access to public marketplace jobs and new match decisions.
+- Server-owned marketplace tenancy for candidate-only tokens without browser-selected tenant context.
+- Product onboarding, pricing strategy, security boundary, and architecture decision documentation.
+
+### Changed
+
+- OIDC initialization is now explicit so anonymous visitors can inspect the product before authentication.
+- Candidate, recruiter, and administrator workspaces use role-aware language and capabilities.
+- Local seeding populates both the organization demo tenant and the public candidate marketplace.
+- The HTML shell is served without caching so hashed frontend bundles cannot become stale across container rebuilds.
+
 ## [0.2.0] - 2026-08-25
 
 ### Added

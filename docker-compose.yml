@@ -16,6 +16,7 @@ services:
       - "8180:8080"
     volumes:
       - ./infra/keycloak/talent-intelligence-realm.json:/opt/keycloak/data/import/talent-intelligence-realm.json:ro
+      - ./infra/keycloak/themes/talent-intelligence:/opt/keycloak/themes/talent-intelligence:ro
       - keycloak-data:/opt/keycloak/data
     security_opt:
       - no-new-privileges:true
@@ -50,6 +51,7 @@ services:
       SECURITY_ISSUER_URI: http://localhost:8180/realms/talent-intelligence
       SECURITY_JWK_SET_URI: http://keycloak:8080/realms/talent-intelligence/protocol/openid-connect/certs
       SECURITY_AUDIENCE: talent-intelligence-api
+      CANDIDATE_MARKETPLACE_TENANT_ID: 00000000-0000-0000-0000-000000000002
       SOURCE_FINGERPRINT_KEY: ${SOURCE_FINGERPRINT_KEY:-local-synthetic-fingerprint-key-change-in-production}
       SOURCE_FINGERPRINT_KEY_VERSION: ${SOURCE_FINGERPRINT_KEY_VERSION:-local-v1}
     depends_on:

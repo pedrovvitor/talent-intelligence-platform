@@ -1,8 +1,7 @@
 package io.github.pedrovvitor.talentintelligence.config
 
 import jakarta.servlet.http.HttpServletResponse
-import io.github.pedrovvitor.talentintelligence.adapter.web.RequestIdentityResolver
-import io.github.pedrovvitor.talentintelligence.domain.TenantId
+import io.github.pedrovvitor.talentintelligence.adapter.web.TenantIdentityPolicy
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.convert.converter.Converter
@@ -37,7 +36,19 @@ class SecurityConfiguration {
                 requests
                     .requestMatchers("/actuator/health/**").permitAll()
                     .requestMatchers(HttpMethod.POST, "/api/jobs").hasRole(PlatformRole.ADMIN.authoritySuffix)
-                    .requestMatchers("/api/jobs/**", "/api/matches/**")
+                    .requestMatchers(HttpMethod.GET, "/api/jobs")
+                    .hasAnyRole(
+                        PlatformRole.CANDIDATE.authoritySuffix,
+                        PlatformRole.RECRUITER.authoritySuffix,
+                        PlatformRole.ADMIN.authoritySuffix,
+                    )
+                    .requestMatchers(HttpMethod.POST, "/api/matches")
+                    .hasAnyRole(
+                        PlatformRole.CANDIDATE.authoritySuffix,
+                        PlatformRole.RECRUITER.authoritySuffix,
+                        PlatformRole.ADMIN.authoritySuffix,
+                    )
+                    .requestMatchers(HttpMethod.GET, "/api/matches/**")
                     .hasAnyRole(PlatformRole.RECRUITER.authoritySuffix, PlatformRole.ADMIN.authoritySuffix)
                     .requestMatchers("/actuator/**").hasRole(PlatformRole.ADMIN.authoritySuffix)
                     .anyRequest().denyAll()
@@ -56,12 +67,14 @@ class SecurityConfiguration {
     }
 
     @Bean
-    fun keycloakAuthoritiesConverter(): Converter<Jwt, AbstractAuthenticationToken> = Converter { jwt ->
-        requireTenantId(jwt)
+    fun keycloakAuthoritiesConverter(
+        tenantIdentityPolicy: TenantIdentityPolicy,
+    ): Converter<Jwt, AbstractAuthenticationToken> = Converter { jwt ->
         val authorities = realmRoles(jwt)
             .map(PlatformRole::fromClaim)
             .filterNotNull()
             .map { role -> SimpleGrantedAuthority("ROLE_${role.authoritySuffix}") }
+        requireTenantIdentity(jwt, authorities.mapNotNull { authority -> authority.authority }, tenantIdentityPolicy)
         JwtAuthenticationToken(jwt, authorities, principalName(jwt))
     }
 
@@ -76,14 +89,16 @@ class SecurityConfiguration {
             ?: jwt.subject?.takeIf(String::isNotBlank)
             ?: throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Subject claim is required", null))
 
-    private fun requireTenantId(jwt: Jwt) {
-        val tenantClaim = jwt.getClaimAsString(RequestIdentityResolver.TENANT_CLAIM)
-            ?: throw OAuth2AuthenticationException(OAuth2Error("invalid_token", "Tenant claim is required", null))
+    private fun requireTenantIdentity(
+        jwt: Jwt,
+        authorities: Collection<String>,
+        tenantIdentityPolicy: TenantIdentityPolicy,
+    ) {
         try {
-            TenantId.parse(tenantClaim)
+            tenantIdentityPolicy.resolve(jwt, authorities)
         } catch (exception: IllegalArgumentException) {
             throw OAuth2AuthenticationException(
-                OAuth2Error("invalid_token", "Tenant claim is invalid", null),
+                OAuth2Error("invalid_token", exception.message ?: "Tenant identity is invalid", null),
                 exception,
             )
         }
@@ -106,6 +121,7 @@ private enum class PlatformRole(
     val claim: String,
     val authoritySuffix: String,
 ) {
+    CANDIDATE("candidate", "CANDIDATE"),
     RECRUITER("recruiter", "RECRUITER"),
     ADMIN("admin", "ADMIN"),
     ;

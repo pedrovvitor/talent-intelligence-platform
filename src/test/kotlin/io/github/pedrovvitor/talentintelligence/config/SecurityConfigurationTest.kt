@@ -1,5 +1,6 @@
 package io.github.pedrovvitor.talentintelligence.config
 
+import io.github.pedrovvitor.talentintelligence.adapter.web.TenantIdentityPolicy
 import org.junit.jupiter.api.Test
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException
 import org.springframework.security.oauth2.jwt.Jwt
@@ -10,20 +11,32 @@ import kotlin.test.assertFailsWith
 class SecurityConfigurationTest {
     @Test
     fun `converter maps only supported realm roles`() {
-        val jwt = jwtWithRoles(VALID_TENANT_ID, "recruiter", "admin", "offline_access")
+        val jwt = jwtWithRoles(VALID_TENANT_ID, "candidate", "recruiter", "admin", "offline_access")
 
-        val authentication = SecurityConfiguration().keycloakAuthoritiesConverter().convert(jwt)
+        val authentication = converter().convert(jwt)
 
-        assertEquals(setOf("ROLE_RECRUITER", "ROLE_ADMIN"), authentication.authorities.map { it.authority }.toSet())
+        assertEquals(
+            setOf("ROLE_CANDIDATE", "ROLE_RECRUITER", "ROLE_ADMIN"),
+            authentication.authorities.map { it.authority }.toSet(),
+        )
         assertEquals("recruiter.synthetic", authentication.name)
     }
 
     @Test
-    fun `converter fails closed when tenant claim is missing`() {
+    fun `converter permits candidate only identity without tenant claim`() {
+        val jwt = jwtWithRoles(null, "candidate")
+
+        val authentication = converter().convert(jwt)
+
+        assertEquals(setOf("ROLE_CANDIDATE"), authentication.authorities.map { it.authority }.toSet())
+    }
+
+    @Test
+    fun `converter fails closed when recruiter tenant claim is missing`() {
         val jwt = jwtWithRoles(null, "recruiter")
 
         assertFailsWith<OAuth2AuthenticationException> {
-            SecurityConfiguration().keycloakAuthoritiesConverter().convert(jwt)
+            converter().convert(jwt)
         }
     }
 
@@ -32,9 +45,13 @@ class SecurityConfigurationTest {
         val jwt = jwtWithRoles("not-a-tenant-id", "recruiter")
 
         assertFailsWith<OAuth2AuthenticationException> {
-            SecurityConfiguration().keycloakAuthoritiesConverter().convert(jwt)
+            converter().convert(jwt)
         }
     }
+
+    private fun converter() = SecurityConfiguration().keycloakAuthoritiesConverter(
+        TenantIdentityPolicy(CANDIDATE_MARKETPLACE_TENANT_ID),
+    )
 
     private fun jwtWithRoles(tenantId: String?, vararg roles: String): Jwt {
         val builder = Jwt.withTokenValue("synthetic-token")
@@ -50,5 +67,6 @@ class SecurityConfigurationTest {
 
     companion object {
         private const val VALID_TENANT_ID = "00000000-0000-0000-0000-000000000001"
+        private const val CANDIDATE_MARKETPLACE_TENANT_ID = "00000000-0000-0000-0000-000000000002"
     }
 }

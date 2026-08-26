@@ -46,6 +46,8 @@ management:
       enabled: true
 
 app:
+  identity:
+    candidate-marketplace-tenant-id: ${CANDIDATE_MARKETPLACE_TENANT_ID:00000000-0000-0000-0000-000000000002}
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
   audit:

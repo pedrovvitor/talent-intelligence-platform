@@ -40,6 +40,19 @@ Keyword filters miss transferable experience, while opaque AI rankings create le
 
 OpenTelemetry, Redis semantic cache, bounded agent tool calling, SSE Generative UI, and Kubernetes delivery are deliberately tracked as future releases. See [production readiness](docs/operations/production-readiness.md).
 
+## On main toward v0.3.0
+
+The unreleased commercial foundation adds a public, recruiter-readable product surface without turning AI into a chat wrapper:
+
+- anonymous product, trust, and pricing pages;
+- free candidate self-registration through a branded OIDC experience;
+- least-privilege candidate matching against a server-owned public marketplace tenant;
+- organization-provisioned recruiter access that prevents self-service role or tenant escalation;
+- role-aware candidate/recruiter workspaces and a responsive visual system shared with Keycloak;
+- documented Candidate, Recruiter Sandbox, Team, and Enterprise packaging without a premature payment dependency.
+
+Pricing is a market hypothesis; billing, entitlements, metering, and automated organization provisioning are not implemented. See [pricing and packaging](docs/product/pricing-and-packaging.md) and [onboarding](docs/product/onboarding.md).
+
 ## Architecture
 
 ```mermaid
@@ -148,6 +161,7 @@ Sign in with a synthetic local account:
 
 | Capability | Username | Password |
 |---|---|---|
+| Candidate | `candidate.synthetic` | `candidate-local-only` |
 | Recruiter | `recruiter.synthetic` | `recruiter-local-only` |
 | Admin | `admin.synthetic` | `admin-local-only` |
 
@@ -228,7 +242,7 @@ Read [CONTRIBUTING.md](CONTRIBUTING.md) and the repository-wide [agent contract]
 ## Delivery roadmap
 
 - `v0.2.0` (current): OIDC/RBAC, tenant isolation, immutable match-decision audit, model and policy version capture.
-- `v0.3.0`: bounded agent tools, approval gates, SSE event contract, and allow-listed Generative UI.
+- `v0.3.0`: public onboarding and packaging, bounded agent tools, approval gates, SSE event contract, and allow-listed Generative UI.
 - `v0.4.0`: Redis semantic cache, OpenTelemetry, SLO dashboards, load tests, and token/cost telemetry.
 - `v1.0.0`: Kubernetes/GitOps deployment, WAF/API gateway integration, backup restore drill, and production threat-model closure.
 
@@ -237,6 +251,8 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 ## Documentation
 
 - [Product specification](docs/product/product-spec.md)
+- [Onboarding and access](docs/product/onboarding.md)
+- [Pricing and packaging](docs/product/pricing-and-packaging.md)
 - [Architecture](docs/architecture/architecture.md)
 - [Match decision audit](docs/architecture/decision-audit.md)
 - [Dependency policy](docs/architecture/dependency-policy.md)

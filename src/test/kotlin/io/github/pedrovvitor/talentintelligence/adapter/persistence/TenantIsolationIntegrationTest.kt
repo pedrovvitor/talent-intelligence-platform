@@ -67,7 +67,7 @@ class TenantIsolationIntegrationTest {
 
     companion object {
         private val TENANT_A = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
-        private val TENANT_B = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        private val TENANT_B = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000003"))
         private const val EMBEDDING_MODEL = "synthetic-embedding-v1"
 
         @Container
