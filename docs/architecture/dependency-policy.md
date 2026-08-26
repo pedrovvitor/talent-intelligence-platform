@@ -12,12 +12,16 @@ Dependencies are admitted only when an approved ticket names the capability, alt
 | Local embedding | BGE small English v1.5 quantized module | Reproducible semantic retrieval without external credentials |
 | Schema migration | Spring Boot Flyway starter and Flyway PostgreSQL module | Boot-managed, ordered, reviewable PostgreSQL migrations with database-specific support |
 | Transactional and vector data | PostgreSQL driver and PGVector extension | One source of truth with vector search colocated for the initial scale |
+| API identity | Spring Boot OAuth2 Resource Server and Spring Security | Standards-based JWT validation and fail-closed capability authorization; replaceable through security ports and OIDC claims |
+| Local identity provider | Keycloak 26.7 | Reproducible OIDC, realm roles, and token issuance for local verification; production may use any compatible managed IdP |
 | Web UI | React 19 | Typed component composition and predictable rendering |
 | Build and styling | Vite 8 and Tailwind CSS 4 | Fast build pipeline and constrained design tokens |
+| Browser identity | Keycloak JavaScript adapter 26.2 | Authorization Code with PKCE, token refresh, and logout without custom protocol code; replaceable behind the frontend authentication boundary |
 
 ## Approved test and quality dependencies
 
 - Spring Boot Test and JUnit Platform.
+- Spring Boot Web MVC Test and Spring Security Test for HTTP authorization boundaries.
 - Kotlin JUnit 5 assertions.
 - Testcontainers 2.0 for PostgreSQL/PGVector integration tests.
 - TypeScript ESLint with strict type-aware rules.

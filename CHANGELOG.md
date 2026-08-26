@@ -8,6 +8,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 - Candidate data classification, retention, deletion, access-logging, and redaction policy.
 - Privacy regression tests that prevent rejected candidate values from leaking through validation responses.
+- OIDC Authorization Code with PKCE, JWT issuer/audience validation, and recruiter/admin capability RBAC.
+- A pinned local Keycloak realm with synthetic users and real-token Docker smoke coverage.
 
 ## [0.1.1] - 2026-08-25
 

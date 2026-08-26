@@ -1,0 +1,108 @@
+{
+  "realm": "talent-intelligence",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "roles": {
+    "realm": [
+      { "name": "recruiter", "description": "Evaluate candidate-to-job matches" },
+      { "name": "admin", "description": "Manage the tenant job catalog" }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "talent-intelligence-api",
+      "name": "Talent Intelligence API",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "bearerOnly": true,
+      "publicClient": false,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": false
+    },
+    {
+      "clientId": "talent-intelligence-web",
+      "name": "Talent Intelligence Web",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": false,
+      "redirectUris": ["http://localhost:3000/*"],
+      "webOrigins": ["http://localhost:3000"],
+      "attributes": {
+        "pkce.code.challenge.method": "S256",
+        "post.logout.redirect.uris": "http://localhost:3000/*"
+      },
+      "protocolMappers": [
+        {
+          "name": "talent-intelligence-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "talent-intelligence-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "talent-intelligence-smoke",
+      "name": "Talent Intelligence Local Smoke Tests",
+      "description": "Local-only direct grant client for deterministic Docker verification",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": true,
+      "standardFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "protocolMappers": [
+        {
+          "name": "talent-intelligence-api-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.client.audience": "talent-intelligence-api",
+            "id.token.claim": "false",
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "recruiter.synthetic",
+      "email": "recruiter@example.test",
+      "firstName": "Synthetic",
+      "lastName": "Recruiter",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "recruiter-local-only", "temporary": false }
+      ],
+      "realmRoles": ["recruiter"]
+    },
+    {
+      "username": "admin.synthetic",
+      "email": "admin@example.test",
+      "firstName": "Synthetic",
+      "lastName": "Administrator",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "admin-local-only", "temporary": false }
+      ],
+      "realmRoles": ["admin"]
+    }
+  ]
+}

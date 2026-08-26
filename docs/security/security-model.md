@@ -19,7 +19,7 @@ flowchart LR
     API -->|Typed events| Browser
 ```
 
-The gateway, OIDC, WAF, and remote model boundary are production targets and are not included in the local `v0.1.1` stack.
+OIDC is implemented locally for v0.2 development. The gateway, WAF, production identity deployment, and remote model boundary remain production targets.
 
 ## Current controls
 
@@ -32,13 +32,15 @@ The gateway, OIDC, WAF, and remote model boundary are production targets and are
 - Database credentials supplied through environment variables and excluded from Git.
 - Stable API errors that avoid stack-trace disclosure.
 - Validation errors discard rejected values and untrusted validator messages.
+- OIDC Authorization Code with PKCE for the browser and signed JWT validation at the API.
+- Exact issuer and audience validation with short-lived tokens and a required actor subject.
+- Allow-listed recruiter/admin capabilities with fail-closed route authorization.
 - Local model output limited to embeddings; it cannot invoke tools or produce executable UI.
 
 Candidate processing, retention, access-event fields, and deletion requirements are defined in the [data governance policy](data-governance.md).
 
 ## Required controls before production
 
-- OIDC authentication, short-lived JWT validation, and recruiter/admin RBAC.
 - Tenant identity enforced in services, queries, constraints, cache keys, and telemetry.
 - Managed secrets with rotation; no production secrets in environment files or manifests.
 - TLS at every external boundary and encryption at rest with managed keys.

@@ -13,7 +13,7 @@ class WebConfiguration(
         registry.addMapping("/api/**")
             .allowedOrigins(allowedOrigin)
             .allowedMethods("GET", "POST")
-            .allowedHeaders("Content-Type", "Accept", "X-Request-Id")
+            .allowedHeaders("Authorization", "Content-Type", "Accept", "X-Request-Id")
             .maxAge(3600)
     }
 }
