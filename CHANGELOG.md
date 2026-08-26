@@ -14,6 +14,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Composite PostgreSQL constraints and Docker-backed tests that prevent cross-tenant job and embedding access.
 - Immutable match-decision aggregates with actor, keyed source fingerprint, version metadata, score snapshots, and ordered evidence.
 - Tenant-scoped decision reproduction through stable decision identifiers and append-only PostgreSQL enforcement.
+- Real-RSA HTTP security tests for invalid signatures, expired tokens, unsupported roles, and cross-tenant decision access.
 
 ## [0.1.1] - 2026-08-25
 

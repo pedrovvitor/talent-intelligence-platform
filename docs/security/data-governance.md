@@ -68,6 +68,7 @@ The target completion time is 30 calendar days. Retries are idempotent. A partia
 
 - Candidate requests and query embeddings are transient and are not represented in the PostgreSQL schema.
 - Stable validation messages discard rejected values and custom validator text; automated tests use synthetic data.
+- Real in-memory RSA tokens cover invalid signatures, expiry, wrong roles, and cross-tenant HTTP access without external identities.
 - Job embeddings are derived rows protected by a foreign-key cascade.
 - Identity, tenant enforcement, keyed candidate fingerprints, and immutable decision storage are implemented by `TIP-101` through `TIP-104`.
 - Runtime retention automation remains a production control to implement before persisted candidate profiles or automated decisions are introduced.

@@ -11,10 +11,12 @@ import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.doReturn
+import org.mockito.Mockito.verify
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.context.annotation.Import
 import org.springframework.http.MediaType
+import org.springframework.http.HttpHeaders
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -25,7 +27,7 @@ import java.time.Instant
 import java.util.UUID
 
 @WebMvcTest(controllers = [JobController::class, MatchController::class])
-@Import(SecurityConfiguration::class, RequestIdentityResolver::class)
+@Import(SecurityConfiguration::class, RequestIdentityResolver::class, SyntheticJwtConfiguration::class)
 class AuthorizationWebIntegrationTest(
     @Autowired private val mockMvc: MockMvc,
 ) {
@@ -42,6 +44,46 @@ class AuthorizationWebIntegrationTest(
                 status { isUnauthorized() }
                 jsonPath("$.code") { value("AUTHENTICATION_REQUIRED") }
             }
+    }
+
+    @Test
+    fun `token with invalid signature fails closed`() {
+        val token = SyntheticJwtFixture.invalidSignatureToken(TENANT_ID, listOf("recruiter"))
+
+        mockMvc.get("/api/jobs") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        }.andExpect {
+            status { isUnauthorized() }
+            jsonPath("$.code") { value("AUTHENTICATION_REQUIRED") }
+        }
+    }
+
+    @Test
+    fun `expired signed token fails closed`() {
+        val token = SyntheticJwtFixture.validToken(
+            TENANT_ID,
+            listOf("recruiter"),
+            expiresAt = Instant.now().minusSeconds(120),
+        )
+
+        mockMvc.get("/api/jobs") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        }.andExpect {
+            status { isUnauthorized() }
+            jsonPath("$.code") { value("AUTHENTICATION_REQUIRED") }
+        }
+    }
+
+    @Test
+    fun `signed token with wrong role is forbidden`() {
+        val token = SyntheticJwtFixture.validToken(TENANT_ID, listOf("viewer"))
+
+        mockMvc.get("/api/jobs") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        }.andExpect {
+            status { isForbidden() }
+            jsonPath("$.code") { value("ACCESS_DENIED") }
+        }
     }
 
     @Test
@@ -99,6 +141,19 @@ class AuthorizationWebIntegrationTest(
     }
 
     @Test
+    fun `tenant cannot reproduce another tenant decision`() {
+        val token = SyntheticJwtFixture.validToken(SECOND_TENANT_ID, listOf("recruiter"))
+
+        mockMvc.get("/api/matches/${EMPTY_DECISION.id}") {
+            header(HttpHeaders.AUTHORIZATION, "Bearer $token")
+        }.andExpect {
+            status { isNotFound() }
+            jsonPath("$.code") { value("MATCH_DECISION_NOT_FOUND") }
+        }
+        verify(matchingService).findDecision(TenantId.parse(SECOND_TENANT_ID), EMPTY_DECISION.id)
+    }
+
+    @Test
     fun `recruiter cannot create jobs`() {
         mockMvc.post("/api/jobs") {
             with(
@@ -132,6 +187,7 @@ class AuthorizationWebIntegrationTest(
 
     companion object {
         private const val TENANT_ID = "00000000-0000-0000-0000-000000000001"
+        private const val SECOND_TENANT_ID = "00000000-0000-0000-0000-000000000002"
         private val EMPTY_DECISION = MatchDecision(
             id = UUID.fromString("00000000-0000-0000-0000-000000000100"),
             createdAt = Instant.parse("2026-08-25T12:00:00Z"),
