@@ -1,6 +1,7 @@
 package io.github.pedrovvitor.talentintelligence.domain
 
 import java.math.BigDecimal
+import java.time.Instant
 import java.util.UUID
 
 data class CandidateProfile(
@@ -35,6 +36,8 @@ data class JobMatch(
 )
 
 class EligibilityPolicy {
+    val version: String = POLICY_VERSION
+
     fun evaluate(candidate: CandidateProfile, job: JobPosting): EligibilityDecision {
         val rejectionReasons = buildList {
             if (candidate.seniority.level < job.seniority.level) {
@@ -66,6 +69,29 @@ class EligibilityPolicy {
         val maximumSalary = job.salaryMax ?: return true
         return maximumSalary >= minimumSalary
     }
+
+    companion object {
+        const val POLICY_VERSION = "eligibility-policy-v1"
+    }
 }
+
+data class MatchDecision(
+    val id: UUID,
+    val createdAt: Instant,
+    val policyVersion: String,
+    val embeddingModel: String,
+    val generativeModel: String?,
+    val promptVersion: String?,
+    val matches: List<JobMatch>,
+)
+
+data class MatchDecisionRecord(
+    val decision: MatchDecision,
+    val tenantId: TenantId,
+    val actorId: String,
+    val purpose: String,
+    val sourceFingerprint: String,
+    val fingerprintKeyVersion: String,
+)
 
 internal fun String.normalized(): String = trim().lowercase()

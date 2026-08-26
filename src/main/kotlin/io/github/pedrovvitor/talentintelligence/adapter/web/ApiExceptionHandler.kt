@@ -1,6 +1,7 @@
 package io.github.pedrovvitor.talentintelligence.adapter.web
 
 import io.github.pedrovvitor.talentintelligence.application.InvalidJobException
+import io.github.pedrovvitor.talentintelligence.application.MatchDecisionNotFoundException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -34,6 +35,13 @@ class ApiExceptionHandler {
     @ExceptionHandler(InvalidJobException::class)
     fun handleInvalidJob(exception: InvalidJobException, request: HttpServletRequest): ResponseEntity<ApiError> =
         errorResponse(HttpStatus.UNPROCESSABLE_CONTENT, "INVALID_JOB", exception.message ?: "Invalid job", request)
+
+    @ExceptionHandler(MatchDecisionNotFoundException::class)
+    fun handleMissingDecision(
+        exception: MatchDecisionNotFoundException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ApiError> =
+        errorResponse(HttpStatus.NOT_FOUND, "MATCH_DECISION_NOT_FOUND", exception.message ?: "Match decision was not found", request)
 
     private fun errorResponse(
         status: HttpStatus,

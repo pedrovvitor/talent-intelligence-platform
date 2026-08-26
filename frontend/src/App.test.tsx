@@ -27,7 +27,15 @@ describe("App", () => {
 
   it("sends a refreshed bearer token with the match request", async () => {
     const getAccessToken = vi.fn(() => Promise.resolve("synthetic-token"));
-    const fetchMock = vi.fn(() => Promise.resolve(new Response(JSON.stringify({ matches: [] }), {
+    const fetchMock = vi.fn(() => Promise.resolve(new Response(JSON.stringify({
+      decisionId: "00000000-0000-0000-0000-000000000100",
+      decidedAt: "2026-08-25T12:00:00Z",
+      policyVersion: "eligibility-policy-v1",
+      embeddingModel: "bge-small-en-v1.5-q",
+      generativeModel: null,
+      promptVersion: null,
+      matches: []
+    }), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     })));

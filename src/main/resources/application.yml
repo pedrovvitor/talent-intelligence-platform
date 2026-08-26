@@ -48,3 +48,6 @@ management:
 app:
   cors:
     allowed-origin: ${CORS_ALLOWED_ORIGIN:http://localhost:3000}
+  audit:
+    fingerprint-key: ${SOURCE_FINGERPRINT_KEY:local-synthetic-fingerprint-key-change-in-production}
+    fingerprint-key-version: ${SOURCE_FINGERPRINT_KEY_VERSION:local-v1}

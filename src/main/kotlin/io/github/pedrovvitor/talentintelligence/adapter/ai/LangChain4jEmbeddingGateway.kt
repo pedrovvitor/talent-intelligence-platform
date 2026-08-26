@@ -8,5 +8,7 @@ import org.springframework.stereotype.Component
 class LangChain4jEmbeddingGateway(
     private val embeddingModel: EmbeddingModel,
 ) : EmbeddingGateway {
+    override val modelVersion: String = "bge-small-en-v1.5-q"
+
     override fun embed(text: String): FloatArray = embeddingModel.embed(text).content().vector()
 }

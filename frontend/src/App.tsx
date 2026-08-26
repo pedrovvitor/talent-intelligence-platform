@@ -1,7 +1,7 @@
 import { type SubmitEvent, useState } from "react";
 import { findMatches, TalentApiError } from "./api";
 import type { AuthSession } from "./auth";
-import type { JobMatch, MatchRequest, Seniority, WorkMode } from "./types";
+import type { JobMatch, MatchRequest, MatchResponse, Seniority, WorkMode } from "./types";
 
 const initialRequest: MatchRequest = {
   headline: "Senior JVM Engineer",
@@ -17,6 +17,7 @@ const initialRequest: MatchRequest = {
 export default function App({ auth }: { auth: AuthSession }) {
   const [request, setRequest] = useState<MatchRequest>(initialRequest);
   const [matches, setMatches] = useState<JobMatch[]>([]);
+  const [decision, setDecision] = useState<MatchResponse | null>(null);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -28,6 +29,7 @@ export default function App({ auth }: { auth: AuthSession }) {
       const accessToken = await auth.getAccessToken();
       const response = await findMatches(request, accessToken);
       setMatches(response.matches);
+      setDecision(response);
       setStatus("success");
     } catch (caughtError: unknown) {
       const message = caughtError instanceof TalentApiError ? caughtError.message : "Matching failed. Try again.";
@@ -127,6 +129,15 @@ export default function App({ auth }: { auth: AuthSession }) {
             </div>
             <p className="max-w-md text-sm leading-6 text-[#596360]">Hard constraints are evaluated before ranking. Semantic relevance contributes 70%; explicit skill coverage contributes 30%.</p>
           </div>
+
+          {decision && (
+            <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 border border-[#174a42]/20 bg-[#edf4ef] px-4 py-3 text-xs text-[#405c54]">
+              <span><strong>Decision</strong> {decision.decisionId.slice(0, 8)}</span>
+              <span><strong>Policy</strong> {decision.policyVersion}</span>
+              <span><strong>Embedding</strong> {decision.embeddingModel}</span>
+              <span><strong>Recorded</strong> {new Date(decision.decidedAt).toLocaleString()}</span>
+            </div>
+          )}
 
           {status === "idle" && <EmptyState title="Ready to evaluate" body="Submit the candidate profile to run semantic retrieval and deterministic eligibility checks." />}
           {status === "loading" && <EmptyState title="Evaluating the catalog" body="The local embedding model is creating the query vector and PGVector is ranking eligible jobs." />}

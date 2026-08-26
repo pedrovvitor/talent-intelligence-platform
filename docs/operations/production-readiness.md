@@ -25,7 +25,7 @@ Status values: `Implemented`, `Partial`, `Planned`, and `Not applicable`.
 | Deploy | Reproducible local Compose stack | Implemented | `docker-compose.yml` |
 | Deploy | Rolling/canary deployment, rollback, HPA, resource policies | Planned | `TIP-401`, v1.0 |
 | Deploy | IaC and GitOps reconciliation | Planned | `TIP-401`, v1.0 |
-| Governance | Versioned AI decision inputs and immutable audit | Planned | `TIP-103`, v0.2 |
+| Governance | Versioned AI decision inputs and immutable audit | Implemented | Tenant-bound HMAC source fingerprint, actor and version metadata, normalized score/evidence snapshots, append-only database triggers |
 | Governance | Data classification, minimization, retention, deletion, and redaction policy | Partial | Policy and HTTP redaction tests implemented by `TIP-104`; runtime lifecycle automation follows persisted candidate storage |
 | Recovery | Automated backups and tested restoration | Planned | `TIP-404`, v1.0 |
 | Recovery | Measured RPO/RTO and disaster-recovery exercise | Planned | `TIP-404` and `TIP-405`, v1.0 |

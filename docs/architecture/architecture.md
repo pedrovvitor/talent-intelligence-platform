@@ -14,7 +14,7 @@ flowchart TB
     subgraph Application
         CatalogService[JobCatalogService]
         MatchingService[MatchingService]
-        Ports[Catalog, index, and embedding ports]
+        Ports[Catalog, index, embedding, and audit ports]
     end
     subgraph Domain
         Job[JobPosting]
@@ -26,6 +26,7 @@ flowchart TB
         JDBC[JdbcJobCatalog]
         Vector[PgVectorJobIndex]
         Embedding[LangChain4jEmbeddingGateway]
+        Audit[JdbcMatchDecisionAudit]
     end
     subgraph Infrastructure
         IdP[OIDC identity provider]
@@ -43,9 +44,11 @@ flowchart TB
     Ports -. implemented by .-> JDBC
     Ports -. implemented by .-> Vector
     Ports -. implemented by .-> Embedding
+    Ports -. implemented by .-> Audit
     JDBC --> Postgres
     Vector --> PGVector
     Embedding --> BGE
+    Audit --> Postgres
     Security --> IdP
     CatalogService --> Job
     MatchingService --> Candidate
@@ -65,6 +68,7 @@ flowchart TB
 - `tenants` is the ownership root established by the signed identity contract.
 - `jobs` stores canonical structured job postings scoped by non-null tenant identity.
 - `job_embeddings` stores a 384-dimensional vector keyed one-to-one to a job within its tenant.
+- `match_decisions`, results, and evidence preserve immutable, versioned decision snapshots without raw candidate input.
 - A composite tenant/job foreign key prevents cross-tenant or orphaned embeddings.
 - HNSW with cosine operators accelerates nearest-neighbor retrieval.
 
@@ -89,4 +93,5 @@ Future agent tools must call application use cases through narrow typed contract
 - Missing canonical jobs are ignored rather than producing vector-only results.
 - Ineligible jobs are removed regardless of semantic relevance.
 - A database or embedding failure propagates as an error; the system does not fabricate matches.
+- An audit write failure rolls back matching and prevents an unaudited decision from being returned.
 - Graceful shutdown allows in-flight requests to finish within a bounded phase.
