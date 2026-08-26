@@ -4,6 +4,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-08-25
+
 ### Added
 
 - Candidate data classification, retention, deletion, access-logging, and redaction policy.
@@ -15,6 +17,10 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Immutable match-decision aggregates with actor, keyed source fingerprint, version metadata, score snapshots, and ordered evidence.
 - Tenant-scoped decision reproduction through stable decision identifiers and append-only PostgreSQL enforcement.
 - Real-RSA HTTP security tests for invalid signatures, expired tokens, unsupported roles, and cross-tenant decision access.
+
+### Changed
+
+- Reduced the frontend Docker build context by excluding local dependencies and generated artifacts.
 
 ## [0.1.1] - 2026-08-25
 
@@ -38,6 +44,7 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - Engineering, architecture, security, operations, ADR, and contribution documentation.
 - Backend and frontend continuous integration quality gates.
 
-[Unreleased]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/pedrovvitor/talent-intelligence-platform/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/pedrovvitor/talent-intelligence-platform/releases/tag/v0.1.1
 [0.1.0]: https://github.com/pedrovvitor/talent-intelligence-platform/releases/tag/v0.1.0
