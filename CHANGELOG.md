@@ -12,6 +12,8 @@ All notable changes follow [Keep a Changelog](https://keepachangelog.com/en/1.1.
 - A pinned local Keycloak realm with synthetic users and real-token Docker smoke coverage.
 - Signed tenant identity propagated through application ports, catalog queries, and vector retrieval.
 - Composite PostgreSQL constraints and Docker-backed tests that prevent cross-tenant job and embedding access.
+- Immutable match-decision aggregates with actor, keyed source fingerprint, version metadata, score snapshots, and ordered evidence.
+- Tenant-scoped decision reproduction through stable decision identifiers and append-only PostgreSQL enforcement.
 
 ## [0.1.1] - 2026-08-25
 

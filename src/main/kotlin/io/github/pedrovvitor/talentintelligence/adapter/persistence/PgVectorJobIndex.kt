@@ -11,7 +11,13 @@ import java.util.UUID
 class PgVectorJobIndex(
     private val jdbcClient: JdbcClient,
 ) : SemanticJobIndex {
-    override fun index(tenantId: TenantId, jobId: UUID, searchableContent: String, embedding: FloatArray) {
+    override fun index(
+        tenantId: TenantId,
+        jobId: UUID,
+        searchableContent: String,
+        embedding: FloatArray,
+        embeddingModel: String,
+    ) {
         jdbcClient.sql(
             """
             insert into job_embeddings (tenant_id, job_id, searchable_content, embedding, embedding_model)
@@ -27,11 +33,16 @@ class PgVectorJobIndex(
             .param("jobId", jobId)
             .param("searchableContent", searchableContent)
             .param("embedding", embedding.toVectorLiteral())
-            .param("embeddingModel", EMBEDDING_MODEL)
+            .param("embeddingModel", embeddingModel)
             .update()
     }
 
-    override fun search(tenantId: TenantId, queryEmbedding: FloatArray, limit: Int): List<SemanticJobCandidate> = jdbcClient.sql(
+    override fun search(
+        tenantId: TenantId,
+        queryEmbedding: FloatArray,
+        embeddingModel: String,
+        limit: Int,
+    ): List<SemanticJobCandidate> = jdbcClient.sql(
         """
         select job_id, 1 - (embedding <=> cast(:queryEmbedding as vector)) as score
         from job_embeddings
@@ -43,7 +54,7 @@ class PgVectorJobIndex(
     )
         .param("tenantId", tenantId.value)
         .param("queryEmbedding", queryEmbedding.toVectorLiteral())
-        .param("embeddingModel", EMBEDDING_MODEL)
+        .param("embeddingModel", embeddingModel)
         .param("limit", limit)
         .query { resultSet, _ ->
             SemanticJobCandidate(
@@ -55,7 +66,4 @@ class PgVectorJobIndex(
 
     private fun FloatArray.toVectorLiteral(): String = joinToString(prefix = "[", postfix = "]")
 
-    companion object {
-        const val EMBEDDING_MODEL = "bge-small-en-v1.5-q"
-    }
 }

@@ -69,6 +69,7 @@ sequenceDiagram
     participant DB as PostgreSQL + PGVector
     participant Catalog as JdbcJobCatalog
     participant Policy as EligibilityPolicy
+    participant Audit as MatchDecisionAudit
 
     User->>UI: Open recruiter workspace
     UI->>IdP: Authorization Code request with PKCE S256
@@ -84,7 +85,7 @@ sequenceDiagram
     Security->>Security: Require RECRUITER or ADMIN capability
     Security->>API: Authenticated request
     API->>API: Bean Validation at trust boundary
-    API->>Service: match(tenantId, candidate, limit)
+    API->>Service: match(RequestIdentity, candidate, limit)
     Service->>Embed: embed(profile query)
     Embed->>Model: Generate 384-dimensional vector
     Model-->>Embed: Query embedding
@@ -107,8 +108,13 @@ sequenceDiagram
             Service->>Service: Exclude before final ranking
         end
     end
-    Service-->>API: Ranked eligible matches
-    API-->>UI: 200 MatchResponse with evidence
+    Service->>Service: HMAC canonical candidate input with tenant binding
+    Service->>Audit: Append actor, source fingerprint, versions, scores, evidence
+    Audit->>DB: Insert immutable decision aggregate
+    DB-->>Audit: Decision stored or transaction fails
+    Audit-->>Service: Audited
+    Service-->>API: Decision ID and ranked eligible matches
+    API-->>UI: 200 versioned MatchResponse with evidence
     UI->>UI: Render allow-listed result components
     UI-->>User: Explainable ranked roles
 ```
@@ -176,6 +182,7 @@ curl --request POST http://localhost:8080/api/matches \
 | AI boundary | Embedding behind an application port; no repository or unrestricted tool access |
 | Hallucination control | Scores derive only from stored jobs and deterministic calculations |
 | Explainability | Typed semantic, skill, and eligibility evidence in every result |
+| Decision governance | Append-only actor/source/version audit with reproducible score and evidence snapshots |
 | Architecture | Domain, application, and adapters with dependency inversion |
 | Data integrity | Flyway-managed PostgreSQL schema; canonical records separated from vectors |
 | Tenant isolation | Signed claim, typed context, scoped catalog/vector queries, and composite database constraints |
@@ -219,6 +226,7 @@ The executable backlog is in [docs/product/backlog.md](docs/product/backlog.md).
 
 - [Product specification](docs/product/product-spec.md)
 - [Architecture](docs/architecture/architecture.md)
+- [Match decision audit](docs/architecture/decision-audit.md)
 - [Dependency policy](docs/architecture/dependency-policy.md)
 - [Coding standards](docs/engineering/coding-standards.md)
 - [Security model](docs/security/security-model.md)

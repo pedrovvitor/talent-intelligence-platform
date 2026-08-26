@@ -27,12 +27,12 @@ class TenantIsolationIntegrationTest {
         val tenantBJob = job("Tenant B Kotlin Engineer")
         catalog.save(TENANT_A, tenantAJob)
         catalog.save(TENANT_B, tenantBJob)
-        vectorIndex.index(TENANT_A, tenantAJob.id, tenantAJob.title, unitVector())
+        vectorIndex.index(TENANT_A, tenantAJob.id, tenantAJob.title, unitVector(), EMBEDDING_MODEL)
 
         assertEquals(listOf(tenantAJob.id), catalog.findAll(TENANT_A).map(JobPosting::id))
         assertEquals(listOf(tenantBJob.id), catalog.findAll(TENANT_B).map(JobPosting::id))
         assertNull(catalog.findById(TENANT_A, tenantBJob.id))
-        assertEquals(listOf(tenantAJob.id), vectorIndex.search(TENANT_A, unitVector(), 10).map { it.jobId })
+        assertEquals(listOf(tenantAJob.id), vectorIndex.search(TENANT_A, unitVector(), EMBEDDING_MODEL, 10).map { it.jobId })
 
         assertFailsWith<DataIntegrityViolationException> {
             jdbcClient.sql(
@@ -45,7 +45,7 @@ class TenantIsolationIntegrationTest {
                 .param("jobId", tenantBJob.id)
                 .param("content", tenantBJob.title)
                 .param("embedding", unitVector().joinToString(prefix = "[", postfix = "]"))
-                .param("model", PgVectorJobIndex.EMBEDDING_MODEL)
+                .param("model", EMBEDDING_MODEL)
                 .update()
         }
     }
@@ -68,6 +68,7 @@ class TenantIsolationIntegrationTest {
     companion object {
         private val TENANT_A = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000001"))
         private val TENANT_B = TenantId(UUID.fromString("00000000-0000-0000-0000-000000000002"))
+        private const val EMBEDDING_MODEL = "synthetic-embedding-v1"
 
         @Container
         @JvmStatic

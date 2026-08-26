@@ -4,10 +4,16 @@ import io.github.pedrovvitor.talentintelligence.domain.CandidateProfile
 import io.github.pedrovvitor.talentintelligence.domain.EligibilityPolicy
 import io.github.pedrovvitor.talentintelligence.domain.JobMatch
 import io.github.pedrovvitor.talentintelligence.domain.JobPosting
+import io.github.pedrovvitor.talentintelligence.domain.MatchDecision
+import io.github.pedrovvitor.talentintelligence.domain.MatchDecisionRecord
 import io.github.pedrovvitor.talentintelligence.domain.MatchEvidence
 import io.github.pedrovvitor.talentintelligence.domain.TenantId
 import io.github.pedrovvitor.talentintelligence.domain.normalized
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+import java.time.Clock
+import java.time.Instant
+import java.util.UUID
 import kotlin.math.round
 
 @Service
@@ -16,13 +22,22 @@ class MatchingService(
     private val semanticJobIndex: SemanticJobIndex,
     private val embeddingGateway: EmbeddingGateway,
     private val eligibilityPolicy: EligibilityPolicy,
+    private val sourceFingerprinter: CandidateSourceFingerprinter,
+    private val decisionAudit: MatchDecisionAudit,
+    private val clock: Clock,
 ) {
-    fun match(tenantId: TenantId, candidate: CandidateProfile, limit: Int): List<JobMatch> {
+    @Transactional
+    fun match(identity: RequestIdentity, candidate: CandidateProfile, limit: Int): MatchDecision {
         val safeLimit = limit.coerceIn(1, MAX_RESULTS)
         val queryEmbedding = embeddingGateway.embed(buildCandidateQuery(candidate))
-        return semanticJobIndex.search(tenantId, queryEmbedding, RETRIEVAL_WINDOW)
+        val matches = semanticJobIndex.search(
+            identity.tenantId,
+            queryEmbedding,
+            embeddingGateway.modelVersion,
+            RETRIEVAL_WINDOW,
+        )
             .mapNotNull { semanticCandidate ->
-                val job = jobCatalog.findById(tenantId, semanticCandidate.jobId) ?: return@mapNotNull null
+                val job = jobCatalog.findById(identity.tenantId, semanticCandidate.jobId) ?: return@mapNotNull null
                 if (!eligibilityPolicy.evaluate(candidate, job).eligible) {
                     return@mapNotNull null
                 }
@@ -30,7 +45,31 @@ class MatchingService(
             }
             .sortedByDescending(JobMatch::finalScore)
             .take(safeLimit)
+        val decision = MatchDecision(
+            id = UUID.randomUUID(),
+            createdAt = Instant.now(clock),
+            policyVersion = eligibilityPolicy.version,
+            embeddingModel = embeddingGateway.modelVersion,
+            generativeModel = null,
+            promptVersion = null,
+            matches = matches,
+        )
+        val sourceFingerprint = sourceFingerprinter.fingerprint(identity.tenantId, candidate)
+        decisionAudit.append(
+            MatchDecisionRecord(
+                decision = decision,
+                tenantId = identity.tenantId,
+                actorId = identity.actorId,
+                purpose = MATCHING_PURPOSE,
+                sourceFingerprint = sourceFingerprint.value,
+                fingerprintKeyVersion = sourceFingerprint.keyVersion,
+            ),
+        )
+        return decision
     }
+
+    fun findDecision(tenantId: TenantId, decisionId: UUID): MatchDecision? =
+        decisionAudit.findById(tenantId, decisionId)
 
     private fun buildCandidateQuery(candidate: CandidateProfile): String = buildString {
         appendLine(candidate.headline)
@@ -72,5 +111,9 @@ class MatchingService(
         private const val RETRIEVAL_WINDOW = 100
         private const val SEMANTIC_WEIGHT = 0.7
         private const val SKILL_WEIGHT = 0.3
+        private const val MATCHING_PURPOSE = "candidate-job-matching"
     }
 }
+
+class MatchDecisionNotFoundException(decisionId: UUID) :
+    RuntimeException("Match decision $decisionId was not found")

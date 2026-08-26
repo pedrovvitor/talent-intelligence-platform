@@ -29,6 +29,12 @@ export type JobMatch = {
 };
 
 export type MatchResponse = {
+  decisionId: string;
+  decidedAt: string;
+  policyVersion: string;
+  embeddingModel: string;
+  generativeModel: string | null;
+  promptVersion: string | null;
   matches: JobMatch[];
 };
 

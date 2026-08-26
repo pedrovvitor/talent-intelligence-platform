@@ -44,7 +44,15 @@ async function readApiError(response: Response): Promise<ApiError> {
 }
 
 function isMatchResponse(value: unknown): value is MatchResponse {
-  return isRecord(value) && Array.isArray(value.matches) && value.matches.every(isJobMatch);
+  return isRecord(value)
+    && typeof value.decisionId === "string"
+    && typeof value.decidedAt === "string"
+    && typeof value.policyVersion === "string"
+    && typeof value.embeddingModel === "string"
+    && (typeof value.generativeModel === "string" || value.generativeModel === null)
+    && (typeof value.promptVersion === "string" || value.promptVersion === null)
+    && Array.isArray(value.matches)
+    && value.matches.every(isJobMatch);
 }
 
 function isJobMatch(value: unknown): boolean {

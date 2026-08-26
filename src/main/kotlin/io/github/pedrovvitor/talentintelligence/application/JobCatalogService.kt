@@ -44,7 +44,13 @@ class JobCatalogService(
         validateSalary(job)
         jobCatalog.save(tenantId, job)
         val searchableContent = buildSearchableContent(job)
-        semanticJobIndex.index(tenantId, job.id, searchableContent, embeddingGateway.embed(searchableContent))
+        semanticJobIndex.index(
+            tenantId,
+            job.id,
+            searchableContent,
+            embeddingGateway.embed(searchableContent),
+            embeddingGateway.modelVersion,
+        )
         return job
     }
 

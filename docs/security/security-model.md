@@ -36,6 +36,7 @@ OIDC is implemented locally for v0.2 development. The gateway, WAF, production i
 - Exact issuer and audience validation with short-lived tokens and a required actor subject.
 - Allow-listed recruiter/admin capabilities with fail-closed route authorization.
 - Signed tenant identity propagated explicitly through use cases, SQL predicates, and composite database constraints.
+- Append-only match decisions with keyed source fingerprints, actor identity, model/policy versions, scores, and evidence snapshots.
 - Local model output limited to embeddings; it cannot invoke tools or produce executable UI.
 
 Candidate processing, retention, access-event fields, and deletion requirements are defined in the [data governance policy](data-governance.md).
@@ -44,7 +45,6 @@ Candidate processing, retention, access-event fields, and deletion requirements 
 
 - Managed secrets with rotation; no production secrets in environment files or manifests.
 - TLS at every external boundary and encryption at rest with managed keys.
-- Immutable decision audit with actor, purpose, source, policy, model, prompt, and embedding versions.
 - Automated tenant-bound deletion and retention execution for persisted candidate data if profile storage is introduced.
 - Rate limits, body-size limits, WAF rules, abuse detection, and safe CORS policy.
 - SAST, SCA, secret scanning, DAST, SBOM, signed images, and deployment admission policy.

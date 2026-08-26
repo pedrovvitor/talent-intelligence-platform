@@ -1,8 +1,10 @@
 package io.github.pedrovvitor.talentintelligence.adapter.web
 
 import io.github.pedrovvitor.talentintelligence.application.MatchingService
+import io.github.pedrovvitor.talentintelligence.application.MatchDecisionNotFoundException
 import io.github.pedrovvitor.talentintelligence.domain.CandidateProfile
 import io.github.pedrovvitor.talentintelligence.domain.JobMatch
+import io.github.pedrovvitor.talentintelligence.domain.MatchDecision
 import io.github.pedrovvitor.talentintelligence.domain.MatchEvidence
 import io.github.pedrovvitor.talentintelligence.domain.Seniority
 import io.github.pedrovvitor.talentintelligence.domain.WorkMode
@@ -14,11 +16,14 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.Size
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import java.math.BigDecimal
+import java.time.Instant
 import java.util.UUID
 
 data class MatchRequest(
@@ -33,8 +38,26 @@ data class MatchRequest(
 )
 
 data class MatchResponse(
+    val decisionId: UUID,
+    val decidedAt: Instant,
+    val policyVersion: String,
+    val embeddingModel: String,
+    val generativeModel: String?,
+    val promptVersion: String?,
     val matches: List<JobMatchResponse>,
-)
+) {
+    companion object {
+        fun from(decision: MatchDecision): MatchResponse = MatchResponse(
+            decisionId = decision.id,
+            decidedAt = decision.createdAt,
+            policyVersion = decision.policyVersion,
+            embeddingModel = decision.embeddingModel,
+            generativeModel = decision.generativeModel,
+            promptVersion = decision.promptVersion,
+            matches = decision.matches.map(JobMatchResponse::from),
+        )
+    }
+}
 
 data class JobMatchResponse(
     val jobId: UUID,
@@ -78,7 +101,18 @@ class MatchController(
             preferredLocations = request.preferredLocations.map(String::trim).filter(String::isNotEmpty).toSet(),
             minimumSalary = request.minimumSalary,
         )
+        val identity = identityResolver.resolve(authentication)
+        return MatchResponse.from(matchingService.match(identity, candidate, request.limit))
+    }
+
+    @GetMapping("/{decisionId}")
+    fun findDecision(
+        @PathVariable decisionId: UUID,
+        authentication: JwtAuthenticationToken,
+    ): MatchResponse {
         val tenantId = identityResolver.resolve(authentication).tenantId
-        return MatchResponse(matchingService.match(tenantId, candidate, request.limit).map(JobMatchResponse::from))
+        val decision = matchingService.findDecision(tenantId, decisionId)
+            ?: throw MatchDecisionNotFoundException(decisionId)
+        return MatchResponse.from(decision)
     }
 }
