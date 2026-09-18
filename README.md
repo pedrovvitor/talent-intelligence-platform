@@ -1,5 +1,8 @@
 # Talent Intelligence Platform
 
+> **Status: active development.** This portfolio project runs locally and has no hosted deployment. The `v0.x` milestones describe development progress, not production readiness. Product flows, evaluation, and operational controls are still evolving; see the [implementation backlog](https://github.com/pedrovvitor/talent-intelligence-platform/issues).
+
+
 [![CI](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/pedrovvitor/talent-intelligence-platform/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-0.2.0-174a42)](CHANGELOG.md)
 [![License](https://img.shields.io/badge/license-MIT-d75d3b)](LICENSE)
@@ -20,7 +23,7 @@ Keyword filters miss transferable experience, while opaque AI rankings create le
 
 ## Current release
 
-`v0.2.0` delivers a governed, production-shaped vertical slice:
+The `v0.2.0` development milestone implements the following vertical slice:
 
 - job catalog write and read APIs;
 - OIDC Authorization Code with PKCE and short-lived JWT access tokens;
