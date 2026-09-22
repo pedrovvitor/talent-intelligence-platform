@@ -21,7 +21,7 @@ repositories {
 
 dependencies {
     implementation(platform("org.springframework.boot:spring-boot-dependencies:4.1.1"))
-    implementation(platform("dev.langchain4j:langchain4j-bom:1.19.0"))
+    implementation(platform("dev.langchain4j:langchain4j-bom:1.20.0"))
 
     implementation("org.springframework.boot:spring-boot-starter-webmvc")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
